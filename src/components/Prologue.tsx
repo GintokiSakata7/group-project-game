@@ -53,7 +53,8 @@ const founderScene = {
 };
 
 export default function Prologue() {
-  const [step, setStep] = useState(0);
+  const initialStep = Number(new URLSearchParams(window.location.search).get('step') || 0);
+  const [step, setStep] = useState(initialStep);
   const [companyName, setCompanyName] = useState(useGameStore.getState().companyName || 'PANIC LABS');
   const [huddleChoice, setHuddleChoice] = useState<string | null>(null);
   const beginClientMeeting = useGameStore((state) => state.beginClientMeeting);

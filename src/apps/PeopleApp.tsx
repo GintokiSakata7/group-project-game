@@ -55,7 +55,7 @@ export default function PeopleApp() {
               <Pill tone={person.availability === 'offline' ? 'danger' : person.availability === 'busy' ? 'warning' : 'good'}>
                 {person.availability}
               </Pill>
-              <h3>{person.name}</h3>
+              <h3>{person.name} ({person.role})</h3>
               <p>{person.title}</p>
             </div>
             <div className="employee-id">EMP-{person.id.toUpperCase()}</div>

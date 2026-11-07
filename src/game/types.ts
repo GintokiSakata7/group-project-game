@@ -10,7 +10,9 @@ export type AppId =
   | 'files'
   | 'terminal'
   | 'preview'
-  | 'music';
+  | 'music'
+  | 'reels'
+  | 'pantry';
 
 export type Phase =
   | 'title'
@@ -219,6 +221,9 @@ export interface GameState {
   completedMissionIds: string[];
   roleAssignments: Record<string, string>;
   activeAppOnDesktop?: AppId | null;
+  coffeeBrewsToday?: number;
+  mealsOrderedToday?: Array<'samosa' | 'biryani' | 'salad' | 'pizza'>;
+  likedReels?: string[];
 }
 
 export type ActionKind = 'code' | 'motivate' | 'pair' | 'audit' | 'client' | 'triage' | 'investigate';

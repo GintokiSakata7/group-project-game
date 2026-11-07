@@ -3,7 +3,8 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { initialChannels, initialDefects, initialEmployees, initialMessages, initialRelationships, initialTasks } from './data';
 import { calculateDeliveryScore, clamp, resolveDay } from './engine';
 import { founderMissions } from './missions';
-import type { ActionKind, AppId, ChatMessage, Defect, Ending, GameEvent, GameOverInfo, GameState, NotificationItem, Phase, ProjectTask } from './types';
+import { generateChatReplies } from './chatReplies';
+import type { ActionKind, AppId, ChatMessage, CommitRecord, Defect, Ending, GameEvent, GameOverInfo, GameState, NotificationItem, Phase, ProjectTask } from './types';
 
 interface CampaignSetup {
   scopeAccepted: string[];
@@ -35,6 +36,9 @@ interface GameStore extends GameState {
   beginKickoffMeeting: () => void;
   completeKickoff: (assignments: Record<string, string>) => void;
   completeFounderMission: (missionId: string, choiceId: string) => void;
+  brewCoffee: (kind: 'chai' | 'filter' | 'espresso') => { success: boolean; message: string; quote: string };
+  orderOfficeFood: (mealId: 'samosa' | 'biryani' | 'salad' | 'pizza') => { success: boolean; message: string };
+  toggleLikeReel: (reelId: string) => void;
 }
 
 const makeMessage = (channelId: string, senderId: string, senderName: string, text: string, day: number, kind: ChatMessage['kind'] = 'normal'): ChatMessage => ({
@@ -50,6 +54,57 @@ const makeNotification = (title: string, body: string, app: AppId, tone: Notific
 
 const confrontationalFallback = (text: string) => /where were you|why didn't|why did you|late again|deadline|you promised/i.test(text);
 
+const initialCommits: CommitRecord[] = [
+  {
+    id: 'c-init-01',
+    taskId: 'task-1',
+    employeeId: 'aarav',
+    employeeName: 'Aarav (Frontend Developer)',
+    day: 1,
+    time: '03:14 AM',
+    message: 'feat: initial project scaffold + 19 dependencies (vibes are immaculate 🚀)',
+    detail: 'Pushed the React 19 shell. ESLint disabled to optimize developer momentum.',
+    filesChanged: ['package.json', 'src/pages/Home.tsx'],
+    additions: 1247,
+    deletions: 0,
+    buildStatus: 'pending',
+    testStatus: 'not_run',
+    qualitySignal: 65,
+  },
+  {
+    id: 'c-init-02',
+    taskId: 'task-2',
+    employeeId: 'varun',
+    employeeName: 'Varun (Technical Lead)',
+    day: 1,
+    time: '08:30 AM',
+    message: 'docs: 7-tier microservice architecture specification (v1-FINAL)',
+    detail: 'Established architectural boundaries and message bus taxonomy in README.',
+    filesChanged: ['README.md'],
+    additions: 47,
+    deletions: 2,
+    buildStatus: 'passed',
+    testStatus: 'passed',
+    qualitySignal: 88,
+  },
+  {
+    id: 'c-init-03',
+    taskId: 'task-3',
+    employeeId: 'meera',
+    employeeName: 'Meera (Quality Assurance)',
+    day: 1,
+    time: '08:55 AM',
+    message: 'test: release gate checklist & 18 sanity test assertions',
+    detail: 'Automated test suite checking pixel margins, WhatsApp payloads, and Bunty Web4 containment.',
+    filesChanged: ['tests/sanity.test.ts'],
+    additions: 84,
+    deletions: 0,
+    buildStatus: 'failed',
+    testStatus: 'failed',
+    qualitySignal: 92,
+  },
+];
+
 const initialState = (): GameState => ({
   phase: 'title', companyName: 'PANIC LABS', clientName: 'Mr. Prakash', projectName: 'Royal Feast Digital Presence', contractValue: 5000, day: 1, campaignSeed: Math.floor(Math.random() * 1_000_000_000), actionsLeft: 5,
   metrics: { progress: 3, quality: 58, clientTrust: 74, morale: 72, technicalDebt: 12, cash: 2500, scopeCreep: 0, bugsOpen: 4 },
@@ -58,12 +113,13 @@ const initialState = (): GameState => ({
   tasks: initialTasks.map((task) => ({ ...task })),
   channels: initialChannels.map((channel) => ({ ...channel })),
   messages: initialMessages.map((message) => ({ ...message })),
-  commits: [], defects: initialDefects.map((defect) => ({ ...defect })),
+  commits: [...initialCommits], defects: initialDefects.map((defect) => ({ ...defect })),
   pendingEvent: null, notifications: [], dailyReports: [], ending: null, gameOver: null, lastAction: '', tutorialSeen: false, scopeAccepted: ['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo'],
   completedMissionIds: [], roleAssignments: { kunal: 'communication', aarav: 'frontend', varun: 'technical', meera: 'quality', nikhil: 'backend' },
+  coffeeBrewsToday: 0, mealsOrderedToday: [], likedReels: ['reel-1'],
 });
 
-const endingFor = (kind: Ending['kind'], title: string, subtitle: string, body: string, score?: number): Ending => ({ kind, title, subtitle, body, score });
+const endingFor = (kind: Ending['kind'], title: string, subtitle: string, body: string, score?: number, rating?: string): Ending => ({ kind, title, subtitle, body, score, rating });
 
 const safeStorage = (() => {
   const memoryStore = new Map<string, string>();
@@ -365,96 +421,47 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       messages.push(makeMessage(channelId, senderId, senderName, body, state.day, kind));
     };
 
-    if (channel.type === 'client') {
-      if (lower.includes('phase 2') || lower.includes('scope') || lower.includes('timeline') || lower.includes('agreed') || lower.includes('change request')) {
-        metrics.clientTrust = clamp(metrics.clientTrust + 2);
-        addReply('prakash', 'Mr. Prakash', 'Okay, okay. Send me the revised list. I will discuss it with Bunty. He is very technical.', 'client');
-      } else if (lower.includes('yes') || lower.includes('sure') || lower.includes('can do') || lower.includes('everything')) {
-        metrics.clientTrust = clamp(metrics.clientTrust + 1);
-        metrics.scopeCreep = clamp(metrics.scopeCreep + 5);
-        metrics.technicalDebt = clamp(metrics.technicalDebt + 2);
-        addReply('prakash', 'Mr. Prakash', 'Excellent. I knew you could do it. One more small thing...', 'client');
-      } else if (lower.includes('no') || lower.includes('cannot') || lower.includes("can't") || lower.includes('not included')) {
-        metrics.clientTrust = clamp(metrics.clientTrust - 3);
-        addReply('prakash', 'Mr. Prakash', 'Hmm. Let me ask Bunty. He says it should be possible with a plugin.', 'client');
-      } else if (lower.includes('preview') || lower.includes('progress') || lower.includes('ready')) {
-        metrics.clientTrust = clamp(metrics.clientTrust + 3);
-        addReply('prakash', 'Mr. Prakash', 'Thank you for the update. The website is looking promising. Please make the logo a little bigger. My wife mentioned it.', 'client');
-      } else {
-        addReply('prakash', 'Mr. Prakash', 'Understood. Please keep me updated. Also, can the logo be a little bigger?', 'client');
-      }
-    } else if (channel.type === 'direct') {
+    // Emotional / morale adjustment for direct messages
+    if (channel.type === 'direct') {
       const employee = employees.find((item) => item.id === channelId);
       if (employee) {
-        const supportive = /thanks|appreciate|good work|great job|well done|nice work|how can i help|need anything|you handled/i.test(clean);
-        const confrontational = /where were you|why didn't|why did you|late again|this is wrong|not acceptable|deadline|you promised/i.test(clean);
+        const supportive = /thanks|appreciate|good work|great job|well done|nice work|how can i help|need anything|you handled|hero|legend/i.test(clean);
+        const confrontational = /where were you|why didn't|why did you|late again|this is wrong|not acceptable|deadline|you promised|useless/i.test(clean);
         employee.founderTrust = clamp(employee.founderTrust + (supportive ? 4 : confrontational ? -3 : 1));
         employee.morale = clamp(employee.morale + (supportive ? 2 : confrontational ? -2 : 0));
         metrics.morale = clamp(Math.round(employees.reduce((sum, item) => sum + item.morale, 0) / employees.length));
       }
+    }
 
-      const replies: Record<string, string> = {
-        kunal: lower.includes('work') || lower.includes('task')
-          ? 'Absolutely. I can take ownership. I will send a structured update after I finish aligning the team.'
-          : 'Absolutely. I am aligned. Shall I schedule a quick alignment call about the alignment?',
-        aarav: lower.includes('test') || lower.includes('review')
-          ? 'Sure bro. I pushed a fix. Meera may find 12 more, but that is a tomorrow problem.'
-          : 'Got it bro. Pushing a fix. If the build breaks, it was already like that.',
-        varun: lower.includes('demo') || lower.includes('show') || lower.includes('prove')
-          ? 'I can share a working demonstration. Give me a moment to locate the branch that contains the implementation.'
-          : 'Acknowledged. I will update the technical documentation and provide a status.',
-        meera: lower.includes('priority') || lower.includes('critical')
-          ? 'Thank you. I have sorted the defects by user impact. The 1px issue has been placed in emotional support.'
-          : 'Please attach the build and acceptance criteria. I will test the actual behaviour.',
-        nikhil: confrontationalFallback(lower)
-          ? 'Network issue. Will send tonight.'
-          : 'will do',
-        bunty: 'I have discussed this with my cousin. He says we can add blockchain in the footer. It is very lightweight.',
-      };
-      addReply(channelId, channel.name, replies[channelId] ?? 'Noted.', channelId === 'bunty' ? 'funny' : 'normal');
-
-      if (channelId === 'bunty' && /yes|sure|good idea|add it|blockchain|ai/i.test(clean)) {
-        metrics.scopeCreep = clamp(metrics.scopeCreep + 4);
-        metrics.technicalDebt = clamp(metrics.technicalDebt + 2);
-      }
-    } else if (channelId === 'random') {
-      addReply('kunal', 'Kunal', 'This is why culture matters. Great message, founder. I have made a playlist for this conversation.', 'funny');
-      if (lower.includes('lunch') || lower.includes('food')) addReply('aarav', 'Aarav', 'I can build a lunch ordering app before the food arrives.', 'funny');
-    } else if (channelId === 'engineering') {
-      const pair = relationships.find((item) => (item.employeeA === 'aarav' && item.employeeB === 'varun') || (item.employeeA === 'varun' && item.employeeB === 'aarav'));
-      if (pair && /pair|together|collaborat|work with/i.test(lower)) {
-        pair.friction = clamp(pair.friction - 5);
-        pair.respect = clamp(pair.respect + 3);
-        addReply('aarav', 'Aarav', 'Fine. I will pair with Varun. But if he opens another architecture diagram, I am opening a new career.', 'funny');
-        addReply('varun', 'Varun', 'I have prepared a lightweight diagram. It has only four boxes. We are making progress.', 'funny');
-      } else if (pair && /blame|fault|who broke|not my|your code/i.test(lower)) {
-        pair.friction = clamp(pair.friction + 5);
-        pair.trust = clamp(pair.trust - 2);
-        addReply('varun', 'Varun', 'For the record, the architecture was correct. The implementation chose a different career path.');
-        addReply('aarav', 'Aarav', 'The endpoint name was /products-v2-final. I did not invent the laws of physics.', 'funny');
-      } else if (/api|integration|backend|build|endpoint/i.test(lower)) {
-        addReply('varun', 'Varun', 'The integration contract is documented. Please check the latest documentation version.', 'normal');
-        addReply('aarav', 'Aarav', 'The documentation says /api/menu. The backend says /api/products. They are in a long-distance relationship.', 'funny');
-      } else {
-        addReply('aarav', 'Aarav', 'I am on it bro. Define “it” and I can make it 60% complete.', 'funny');
-      }
-    } else if (channelId === 'qa-room') {
-      if (/skip|ignore|later|minor|cosmetic/i.test(lower)) {
-        addReply('meera', 'Meera', 'I have marked that as deferred. It is not deleted from my memory or the spreadsheet.', 'funny');
-      } else {
-        addReply('meera', 'Meera', 'Please provide a reproducible build, expected behaviour and actual behaviour. I have a fresh tab open.', 'normal');
-      }
-    } else {
-      if (/meeting|sync|stand.?up|call/i.test(lower)) {
-        addReply('kunal', 'Kunal', 'I have scheduled a 15-minute sync. The calendar says 45 minutes. I am working on it.', 'funny');
-      } else if (/nikhil|ghost|online/i.test(lower)) {
-        addReply('nikhil', 'Nikhil', 'seen', 'funny');
-        addReply('kunal', 'Kunal', 'He is online! Everybody act natural.', 'funny');
-      } else if (/deadline|deliver|ship|finish/i.test(lower)) {
-        addReply('meera', 'Meera', 'I need the release candidate and acceptance criteria before anyone declares victory.', 'normal');
-        addReply('aarav', 'Aarav', 'It is basically done. I am defining basically as “the page loads”.', 'funny');
-      } else {
-        addReply('kunal', 'Kunal', 'Love the initiative. I will capture this in the meeting notes and the meeting notes about the meeting notes.', 'funny');
+    // Dynamic, rule-based if/else reply generation
+    const replies = generateChatReplies(channelId, channel.type, clean, state.day);
+    for (const reply of replies) {
+      addReply(reply.senderId, reply.senderName, reply.text, reply.kind ?? 'normal');
+      if (reply.effectDeltas) {
+        if (typeof reply.effectDeltas.clientTrust === 'number') {
+          metrics.clientTrust = clamp(metrics.clientTrust + reply.effectDeltas.clientTrust);
+        }
+        if (typeof reply.effectDeltas.scopeCreep === 'number') {
+          metrics.scopeCreep = clamp(metrics.scopeCreep + reply.effectDeltas.scopeCreep);
+        }
+        if (typeof reply.effectDeltas.technicalDebt === 'number') {
+          metrics.technicalDebt = clamp(metrics.technicalDebt + reply.effectDeltas.technicalDebt);
+        }
+        if (typeof reply.effectDeltas.morale === 'number') {
+          metrics.morale = clamp(metrics.morale + reply.effectDeltas.morale);
+        }
+        if (reply.effectDeltas.employeeMorale) {
+          Object.entries(reply.effectDeltas.employeeMorale).forEach(([empId, delta]) => {
+            const emp = employees.find((e) => e.id === empId);
+            if (emp) emp.morale = clamp(emp.morale + delta);
+          });
+        }
+        if (reply.effectDeltas.founderTrust) {
+          Object.entries(reply.effectDeltas.founderTrust).forEach(([empId, delta]) => {
+            const emp = employees.find((e) => e.id === empId);
+            if (emp) emp.founderTrust = clamp(emp.founderTrust + delta);
+          });
+        }
       }
     }
 
@@ -605,7 +612,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
     if (metrics.clientTrust <= 5) {
       get().deliverProject();
-      set({ phase: 'ending', ending: endingFor('cancelled', 'THE CLIENT HAS LEFT THE CHAT', 'Contract terminated', 'The client has lost confidence in the project. Bunty has recommended another developer. Your company has received a one-star review and a voice note.', 0) });
+      set({ phase: 'ending', ending: endingFor('cancelled', 'THE CLIENT HAS LEFT THE CHAT', 'Contract terminated', 'The client has lost confidence in the project. Bunty has recommended another developer. Your company has received a one-star review and a voice note.', 0, 'CONTRACT TERMINATED') });
     }
   },
 
@@ -643,7 +650,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       newMessages.push(makeMessage('engineering', 'system', 'BUILD MONITOR', 'Build stability has degraded. A new warning has appeared: “The codebase is asking for a weekend.”', nextDay, 'system'));
     }
     if (metrics.clientTrust <= 10) {
-      set({ phase: 'ending', ending: endingFor('cancelled', 'CONTRACT CANCELLED', 'The client ran out of patience', 'Mr. Prakash has paused the project and moved the work to someone who promised “everything by tonight”. The client has not yet discovered that person is Bunty.', 0) });
+      set({ phase: 'ending', ending: endingFor('cancelled', 'CONTRACT CANCELLED', 'The client ran out of patience', 'Mr. Prakash has paused the project and moved the work to someone who promised “everything by tonight”. The client has not yet discovered that person is Bunty.', 0, 'CONTRACT TERMINATED') });
       return;
     }
     set({
@@ -656,6 +663,8 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       metrics,
       dailyReports: dailyReport,
       pendingEvent: null,
+      coffeeBrewsToday: 0,
+      mealsOrderedToday: [],
       notifications: [notification, ...state.notifications].slice(0, 30),
       lastAction: `Day ${state.day} closed. Day ${nextDay} has begun.`,
     });
@@ -698,20 +707,20 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       dailyReports: finalState.dailyReports,
     } : {};
     if (trust < 18) {
-      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'cancelled', title: 'THE CLIENT HAS LEFT THE CHAT', subtitle: 'Contract terminated', body: 'Mr. Prakash has cancelled the project. His final message: “No hard feelings. Bunty found a guy.” There are, in fact, hard feelings.', score: result.total, breakdown: result.breakdown } });
+      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'cancelled', title: 'THE CLIENT HAS LEFT THE CHAT', subtitle: 'Contract terminated', rating: 'CONTRACT TERMINATED', body: 'Mr. Prakash has cancelled the project. His final message: “No hard feelings. Bunty found a guy.” There are, in fact, hard feelings.', score: result.total, breakdown: result.breakdown } });
       return;
     }
     if (coreDone < result.requiredCore) {
-      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'deadline', title: 'DEADLINE: 0 · PANIC: 100', subtitle: 'The delivery never materialised', body: `Only ${coreDone} of ${result.coreTotal} scoped deliverables reached a usable state. ${result.requiredCore} were required for acceptance. The client opened the link, saw a loading spinner and asked whether that was the final logo.`, score: result.total, breakdown: result.breakdown } });
+      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'deadline', title: 'DEADLINE: 0 · PANIC: 100', subtitle: 'The delivery never materialised', rating: 'DEADLINE MISSED', body: `Only ${coreDone} of ${result.coreTotal} scoped deliverables reached a usable state. ${result.requiredCore} were required for acceptance. The client opened the link, saw a loading spinner and asked whether that was the final logo.`, score: result.total, breakdown: result.breakdown } });
       return;
     }
     if (criticalOpen > 0 || quality < 36) {
-      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'quality', title: 'IT WORKS ON MY MACHINE', subtitle: 'Rejected during acceptance testing', body: `${criticalOpen} critical defect(s) remain open and verified quality is ${Math.round(quality)}%. The client clicked the primary button. Nothing happened. Meera quietly closed her laptop.`, score: result.total, breakdown: result.breakdown } });
+      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'quality', title: 'IT WORKS ON MY MACHINE', subtitle: 'Rejected during acceptance testing', rating: 'QA REJECTION', body: `${criticalOpen} critical defect${criticalOpen === 1 ? '' : 's'} remain open and verified quality is ${Math.round(quality)}%. The client clicked the primary button. Nothing happened. Meera quietly closed her laptop.`, score: result.total, breakdown: result.breakdown } });
       return;
     }
     const rating = result.total >= 82 ? 'LEGENDARY DELIVERY' : result.total >= 68 ? 'PROFESSIONAL DELIVERY' : result.total >= 52 ? 'ACCEPTABLE DELIVERY' : 'BARELY SHIPPED';
     const title = result.total >= 82 ? 'SOMEHOW, YOU COOKED' : result.total >= 68 ? 'A REAL PRODUCT. IN THIS ECONOMY.' : result.total >= 52 ? 'IT IS ACTUALLY LIVE' : 'THE SITE IS UP. PLEASE DON’T CLICK TOO MUCH.';
-    set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'success', title, subtitle: rating, body: `Royal Feast has accepted the Phase 1 delivery. The team survived seven days, several questionable commits and at least one motivational playlist. Mr. Prakash has confirmed the handover. Your first client is officially in the books.`, score: result.total, rating, breakdown: result.breakdown } });
+    set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'success', title, subtitle: rating, rating, body: `Royal Feast has accepted the Phase 1 delivery. The team survived seven days, several questionable commits and at least one motivational playlist. Mr. Prakash has confirmed the handover. Your first client is officially in the books.`, score: result.total, breakdown: result.breakdown } });
   },
 
   fixDefect: (defectId) => {
@@ -731,6 +740,166 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       notifications: [makeNotification('EMPLOYEE INSIGHT', `${target.name}'s hidden working trait has been revealed.`, 'people', 'info', state.day), ...state.notifications].slice(0, 30),
     };
   }),
+
+  brewCoffee: (kind) => {
+    const state = get();
+    const brews = state.coffeeBrewsToday || 0;
+    if (brews >= 3) {
+      return {
+        success: false,
+        message: 'The coffee machine is smoking. Aarav says 3 cups is the maximum safe limit before hallucinations begin.',
+        quote: 'Aarav: "Bro stop. My hands are vibrating at 60Hz."',
+      };
+    }
+    const costs: Record<'chai' | 'filter' | 'espresso', number> = { chai: 0, filter: 40, espresso: 100 };
+    const cost = costs[kind];
+    if (state.metrics.cash < cost) {
+      return {
+        success: false,
+        message: `Company funds too low. Need ₹${cost} for ${kind === 'filter' ? 'Filter Coffee' : 'Nitro Espresso'}.`,
+        quote: 'Kunal: "Let us hydrate spiritually with tap water instead!"',
+      };
+    }
+
+    const quotes: Record<'chai' | 'filter' | 'espresso', { quote: string; desc: string; author: string }> = {
+      chai: {
+        author: 'Aarav',
+        quote: '“Cutting Chai received. CSS flexbox alignment accuracy temporarily increased by 40%.”',
+        desc: 'Hot roadside cutting chai dispensed. Morale boosted +5%, fatigue lowered -8%.',
+      },
+      filter: {
+        author: 'Varun',
+        quote: '“The filter coffee has clarified my thoughts. I now realize the microservice wasn’t necessary. I will build it anyway.”',
+        desc: 'South Indian Kaapi served. Focus +12%, Morale +8%, fatigue lowered -12%.',
+      },
+      espresso: {
+        author: 'Meera',
+        quote: '“My heart rate is 140 bpm. I have discovered 14 new defects that nobody even created yet.”',
+        desc: 'Emergency Nitro Espresso consumed. Fatigue dropped -22%, team alertness through the roof.',
+      },
+    };
+
+    const details = quotes[kind];
+    const employees = state.employees.map((e) => ({
+      ...e,
+      morale: clamp(e.morale + (kind === 'espresso' ? 10 : kind === 'filter' ? 8 : 5)),
+      fatigue: clamp(e.fatigue - (kind === 'espresso' ? 22 : kind === 'filter' ? 12 : 8)),
+    }));
+    const metrics = {
+      ...state.metrics,
+      cash: Math.max(0, state.metrics.cash - cost),
+      morale: clamp(Math.round(employees.reduce((sum, e) => sum + e.morale, 0) / employees.length)),
+    };
+
+    const nextMessages = [
+      ...state.messages,
+      makeMessage('general', 'system', 'OFFICE PANTRY', `☕ ${details.author} took a break: ${details.quote}`, state.day, 'funny'),
+    ];
+
+    set({
+      employees,
+      metrics,
+      messages: nextMessages,
+      coffeeBrewsToday: brews + 1,
+      lastAction: `Office break: brewed ${kind}. ${details.desc}`,
+    });
+
+    return {
+      success: true,
+      message: details.desc,
+      quote: details.quote,
+    };
+  },
+
+  orderOfficeFood: (mealId) => {
+    const state = get();
+    const ordered = state.mealsOrderedToday || [];
+    if (ordered.includes(mealId)) {
+      return { success: false, message: 'You already ordered this meal today! Save some room for dinner.' };
+    }
+
+    const mealConfig: Record<'samosa' | 'biryani' | 'salad' | 'pizza', { title: string; cost: number; morale: number; fatigue: number; slack: string; sender: string }> = {
+      samosa: {
+        title: '4 PM Cutting Chai & Hot Samosas',
+        cost: 150,
+        morale: 10,
+        fatigue: -14,
+        slack: 'Hot samosas arrived at 4 PM! Kunal is calling this “high velocity carbohydrate synergy”.',
+        sender: 'Kunal',
+      },
+      biryani: {
+        title: 'Royal Dum Biryani Team Feast',
+        cost: 450,
+        morale: 22,
+        fatigue: -24,
+        slack: 'Chicken Dum Biryani is here. Aarav claims all merge conflicts are spiritually resolved.',
+        sender: 'Aarav',
+      },
+      salad: {
+        title: 'Synergy Superfood Salad Bowls',
+        cost: 350,
+        morale: 8,
+        fatigue: -10,
+        slack: 'Salad bowls delivered. Meera approves of the balanced nutrition. Aarav is searching for carbs.',
+        sender: 'Meera',
+      },
+      pizza: {
+        title: 'Midnight Crunch Box (3 Large Pizzas)',
+        cost: 550,
+        morale: 26,
+        fatigue: -30,
+        slack: 'Crunch time pizza unlocked. Varun says pepperoni contains essential microservice enzymes.',
+        sender: 'Varun',
+      },
+    };
+
+    const config = mealConfig[mealId];
+    if (state.metrics.cash < config.cost) {
+      return { success: false, message: `Not enough company funds! ${config.title} requires ₹${config.cost}.` };
+    }
+
+    const employees = state.employees.map((e) => ({
+      ...e,
+      morale: clamp(e.morale + config.morale),
+      fatigue: clamp(e.fatigue + config.fatigue),
+    }));
+
+    const metrics = {
+      ...state.metrics,
+      cash: Math.max(0, state.metrics.cash - config.cost),
+      morale: clamp(Math.round(employees.reduce((sum, e) => sum + e.morale, 0) / employees.length)),
+    };
+
+    const newMessages = [
+      ...state.messages,
+      makeMessage('general', 'system', 'PANICEATS DELIVERY', `🍱 Food arrived: ${config.slack}`, state.day, 'funny'),
+    ];
+
+    if (mealId === 'samosa') {
+      newMessages.push(makeMessage('bunty', 'bunty', 'Bunty (uninvited)', 'Are there extra samosas for my cousin? He is coding Web4.', state.day, 'funny'));
+    } else if (mealId === 'biryani') {
+      newMessages.push(makeMessage('nikhil', 'nikhil', 'Nikhil', 'biryani was acceptable.', state.day, 'normal'));
+    }
+
+    set({
+      employees,
+      metrics,
+      messages: newMessages,
+      mealsOrderedToday: [...ordered, mealId],
+      lastAction: `Ordered ${config.title} for ₹${config.cost}. Morale +${config.morale}%.`,
+    });
+
+    return { success: true, message: `Ordered ${config.title}! Team morale boosted by +${config.morale}%.` };
+  },
+
+  toggleLikeReel: (reelId) => {
+    const state = get();
+    const liked = state.likedReels || [];
+    const isLiked = liked.includes(reelId);
+    set({
+      likedReels: isLiked ? liked.filter((id) => id !== reelId) : [...liked, reelId],
+    });
+  },
 
   dismissEvent: () => set({ pendingEvent: null }),
 }), {
@@ -767,7 +936,9 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       messages: Array.isArray(persistedState?.messages) && persistedState.messages.length > 0
         ? persistedState.messages
         : fresh.messages,
-      commits: Array.isArray(persistedState?.commits) ? persistedState.commits : fresh.commits,
+      commits: Array.isArray(persistedState?.commits) && persistedState.commits.length > 0
+        ? persistedState.commits
+        : fresh.commits,
       defects: Array.isArray(persistedState?.defects) && persistedState.defects.length > 0
         ? persistedState.defects
         : fresh.defects,

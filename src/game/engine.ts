@@ -61,7 +61,7 @@ export function resolveDay(state: GameState): DayResolution {
     const assignedTasks = tasks.filter((candidate) => candidate.assignedTo === employee.id && candidate.progress < 100 && !['backlog', 'blocked', 'done', 'review'].includes(candidate.status));
     const priorityWeight: Record<ProjectTask['priority'], number> = { critical: 4, high: 3, normal: 2, low: 1 };
     const task = assignedTasks
-      .filter((candidate) => candidate.dependencies.every((dependency) => {
+      .filter((candidate) => (candidate.dependencies ?? []).every((dependency) => {
         const dependencyTask = tasks.find((item) => item.id === dependency);
         return !dependencyTask || dependencyTask.progress >= 45 || completedBefore.has(dependency);
       }))
@@ -205,6 +205,11 @@ export function calculateDeliveryScore(state: GameState) {
   const stability = Math.max(0, 15 - criticalOpen * 8 - Math.round(state.metrics.technicalDebt * 0.08));
   const team = Math.round(state.metrics.morale * 0.05);
   const total = Math.min(100, deadline + qualityScore + trust + stability + team);
+  const defectDetail = criticalOpen === 0
+    ? 'No critical defects remain open.'
+    : criticalOpen === 1
+      ? '1 critical defect remains open.'
+      : `${criticalOpen} critical defects remain open.`;
   return {
     total,
     coreDone,
@@ -215,7 +220,7 @@ export function calculateDeliveryScore(state: GameState) {
       { label: 'Deliverable coverage', score: deadline, detail: `${coreDone} of ${coreIds.length} core deliverables reached 75%.` },
       { label: 'Product quality', score: qualityScore, detail: `Average verified quality: ${Math.round(quality)}%.` },
       { label: 'Client trust', score: trust, detail: `Client confidence: ${Math.round(state.metrics.clientTrust)}%.` },
-      { label: 'Release stability', score: stability, detail: `${criticalOpen} critical defects remain open.` },
+      { label: 'Release stability', score: stability, detail: defectDetail },
       { label: 'Team health', score: team, detail: `Team morale: ${Math.round(state.metrics.morale)}%.` },
     ],
   };

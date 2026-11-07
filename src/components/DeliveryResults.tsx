@@ -21,7 +21,15 @@ export default function DeliveryResults() {
 
   const success = ending?.kind === 'success';
   const score = ending?.score ?? 0;
-  const rating = ending?.rating ?? (score >= 80 ? 'LEGENDARY DELIVERY' : score >= 60 ? 'SOLID DELIVERY' : 'CHAOTIC SHIPMENT');
+  const rating = ending?.rating ?? (
+    success
+      ? (score >= 82 ? 'LEGENDARY DELIVERY' : score >= 68 ? 'PROFESSIONAL DELIVERY' : score >= 50 ? 'SCRAPPY LAUNCH' : 'SURVIVAL DELIVERY')
+      : ending?.kind === 'cancelled'
+        ? 'CONTRACT TERMINATED'
+        : ending?.kind === 'deadline'
+          ? 'DEADLINE MISSED'
+          : 'QA REJECTION'
+  );
 
   // Identify standout teammates
   const completedTasks = tasks.filter((t) => t.progress >= 75).length;
@@ -86,10 +94,10 @@ Play at: The Group Project`;
             </div>
             <div className="results-titles">
               <span className="results-kicker">
-                {success ? 'CONTRACT FULFILLED' : 'DELIVERY FAILED'}
+                {success ? 'CONTRACT FULFILLED' : ending?.kind === 'cancelled' ? 'CONTRACT TERMINATED' : ending?.kind === 'deadline' ? 'DEADLINE MISSED' : 'ACCEPTANCE FAILED'}
               </span>
               <h1>{ending?.title ?? 'PROJECT COMPLETED'}</h1>
-              <div className="results-rating-pill">
+              <div className={`results-rating-pill ${success ? 'pill-success' : 'pill-failure'}`}>
                 <Award size={18} />
                 <span>{rating}</span>
               </div>
@@ -109,10 +117,14 @@ Play at: The Group Project`;
               <p>
                 {success
                   ? '“The website works! Customers are already sending WhatsApp enquiries, and my phone stopped ringing at 2:00 AM. You delivered, founder. You delivered.”'
-                  : '“I clicked the menu button and it redirected me to a video of a cat. Bunty says this is not industry standard.”'}
+                  : ending?.kind === 'deadline'
+                    ? '“I gathered my entire family to see our catering portal, and there were only 2 blank boxes and a spinning circle. Bunty has already engaged a freelancer from Reddit.”'
+                    : ending?.kind === 'cancelled'
+                      ? '“Patience has limits, founder. We had a commitment. Bunty took my phone and showed me someone who promised the full portal in 12 hours.”'
+                      : '“I clicked the menu button and it redirected me to a video of a cat. Bunty says this is not industry standard.”'}
               </p>
               <small>
-                <em>Bunty:</em> {success ? '“Still needs blockchain in the footer though.”' : '“My friend on Discord warned you!”'}
+                <em>Bunty:</em> {success ? '“Still needs blockchain in the footer though.”' : ending?.kind === 'deadline' ? '“I told Uncle: why hire 5 developers when 1 prompt can make a metaverse?”' : '“My friend on Discord warned you!”'}
               </small>
             </div>
           </div>

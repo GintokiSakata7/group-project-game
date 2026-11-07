@@ -14,6 +14,11 @@ import {
   Volume2,
   X,
   Zap,
+  Rocket,
+  CalendarClock,
+  GitBranch,
+  Globe,
+  ShieldCheck,
 } from 'lucide-react';
 import { useGameStore } from '../game/store';
 import { missionsForDay, type FounderMission, type MissionChoice, type DialogueLine } from '../game/missions';
@@ -32,22 +37,34 @@ const characterColors: Record<CharacterId, { bg: string; accent: string; border:
 };
 
 const characterNames: Record<CharacterId, string> = {
-  kunal: 'Kunal',
-  aarav: 'Aarav',
-  varun: 'Varun',
-  meera: 'Meera',
-  nikhil: 'Nikhil',
-  prakash: 'Mr. Prakash',
-  bunty: 'Bunty',
+  kunal: 'Kunal (Client Relations)',
+  aarav: 'Aarav (Full-Stack Vibe Coder)',
+  varun: 'Varun (Technical Lead)',
+  meera: 'Meera (Quality Assurance)',
+  nikhil: 'Nikhil (Backend Developer)',
+  prakash: 'Mr. Prakash (Client)',
+  bunty: "Bunty (Client's Nephew)",
   founder: 'You (Founder)',
+};
+
+const getRoleDetails = (roleString: string) => {
+  if (!roleString) return { role: '', nickname: '' };
+  const match = roleString.match(/^([^(]+)\s*\((["']?.+?["']?)\)$/);
+  if (match) {
+    return { role: match[1].trim(), nickname: match[2].replace(/^["']|["']$/g, '').trim() };
+  }
+  return { role: roleString, nickname: '' };
 };
 
 export default function MissionControl({ day }: { day: number }) {
   const completedMissionIds = useGameStore((state) => state.completedMissionIds);
   const completeFounderMission = useGameStore((state) => state.completeFounderMission);
+  const openDesktop = useGameStore((state) => state.openDesktop);
 
-  const [missionId, setMissionId] = useState<string | null>(null);
-  const [phase, setPhase] = useState<'dialogue' | 'decision' | 'reaction' | 'cleared'>('dialogue');
+  const initialMission = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('mission') : null;
+  const [missionId, setMissionId] = useState<string | null>(initialMission);
+  const initialSubphase = ((typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('subphase') : null) as any) || 'dialogue';
+  const [phase, setPhase] = useState<'dialogue' | 'decision' | 'reaction' | 'cleared'>(initialSubphase);
   const [step, setStep] = useState<number>(0);
   const [reactionStep, setReactionStep] = useState<number>(0);
   const [result, setResult] = useState<MissionChoice | null>(null);
@@ -215,18 +232,64 @@ export default function MissionControl({ day }: { day: number }) {
           <div className="current-mission-card">
             <div className="mission-card-number">0{completedCount + 1}</div>
             <div className="mission-card-content">
-              <span className="mission-location">
-                <MapPin size={13} /> {currentMission.location}
-              </span>
+              <div className="mission-card-tags">
+                <span className="mission-location">
+                  <MapPin size={13} /> {currentMission.location}
+                </span>
+                {currentMission.missionType && (
+                  <span className="mission-type-pill">
+                    {currentMission.missionType === 'sprint_triage' ? <CalendarClock size={12} /> :
+                     currentMission.missionType === 'code_audit' ? <GitBranch size={12} /> :
+                     currentMission.missionType === 'staging_test' ? <Globe size={12} /> :
+                     currentMission.missionType === 'qa_triage' ? <ShieldCheck size={12} /> :
+                     <MessageSquare size={12} />}
+                    {currentMission.missionType.replace('_', ' ').toUpperCase()}
+                  </span>
+                )}
+              </div>
               <h3>{currentMission.title}</h3>
               <p>{currentMission.objective}</p>
+
+              {currentMission.simulationObjectives && currentMission.simulationObjectives.length > 0 && (
+                <div className="mission-objectives-preview">
+                  {currentMission.simulationObjectives.map((obj, i) => (
+                    <div key={obj.id} className="mission-obj-bullet">
+                      <span className="mission-obj-num">0{i + 1}</span>
+                      <span>{obj.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="mission-reward-note">
-                INTERACTIVE GROUP DISCUSSION · ALL CHARACTERS SPEAK · CONSEQUENCES CARRY FORWARD
+                INTERACTIVE SIMULATION · REAL SYSTEM CHANGES · CONSEQUENCES CARRY FORWARD
               </div>
             </div>
-            <button className="mission-start-button" onClick={() => startMission(currentMission)}>
-              START DISCUSSION <ArrowRight size={17} />
-            </button>
+            <div className="mission-card-buttons">
+              {currentMission.appTarget && currentMission.missionType !== 'standup' ? (
+                <>
+                  <button
+                    className="mission-launch-button"
+                    onClick={() => {
+                      sound.playClick();
+                      openDesktop(currentMission.appTarget);
+                    }}
+                  >
+                    <Rocket size={15} /> {currentMission.appActionLabel || 'LAUNCH SIMULATION'} <ArrowRight size={15} />
+                  </button>
+                  <button
+                    className="mission-standup-secondary-button"
+                    onClick={() => startMission(currentMission)}
+                  >
+                    <MessageSquare size={13} /> Stand-up Discussion
+                  </button>
+                </>
+              ) : (
+                <button className="mission-start-button" onClick={() => startMission(currentMission)}>
+                  START STAND-UP <ArrowRight size={17} />
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="mission-cleared-card">
@@ -292,9 +355,23 @@ export default function MissionControl({ day }: { day: number }) {
                 <span>
                   DAY {day} · STORY MISSION {completedCount + (result ? 0 : 1)} / {dayMissions.length}
                 </span>
-                <span>
-                  <MapPin size={13} /> {selectedMission.location}
-                </span>
+                <div className="mission-topline-right-group">
+                  {selectedMission.appTarget && selectedMission.missionType !== 'standup' && (
+                    <button
+                      className="mission-jump-simulation-btn"
+                      onClick={() => {
+                        closeModal();
+                        openDesktop(selectedMission.appTarget);
+                      }}
+                      title={`Jump directly into ${selectedMission.appTarget} simulation`}
+                    >
+                      <Rocket size={12} /> Jump to {selectedMission.appTarget.toUpperCase()} Simulation
+                    </button>
+                  )}
+                  <span>
+                    <MapPin size={13} /> {selectedMission.location}
+                  </span>
+                </div>
               </div>
 
               {/* Attendees Roster Bar */}
@@ -368,19 +445,24 @@ export default function MissionControl({ day }: { day: number }) {
                       </div>
                     </>
                   ) : phase === 'reaction' && currentReaction ? (
-                    <>
-                      <CharacterSprite
-                        character={currentReaction.speaker}
-                        size="xl"
-                        expression={currentReaction.expression || 'talking'}
-                        speaking={true}
-                      />
-                      <span>{currentReaction.name.toUpperCase()}</span>
-                      <small>{currentReaction.role}</small>
-                      <div className="mission-speaker-pill">
-                        <Volume2 size={12} /> REACTING
-                      </div>
-                    </>
+                    (() => {
+                      const details = getRoleDetails(currentReaction.role);
+                      return (
+                        <>
+                          <CharacterSprite
+                            character={currentReaction.speaker}
+                            size="xl"
+                            expression={currentReaction.expression || 'talking'}
+                            speaking={true}
+                          />
+                          <span>{currentReaction.name.toUpperCase()} ({details.role.toUpperCase()})</span>
+                          <small>{details.nickname ? `"${details.nickname}"` : details.role}</small>
+                          <div className="mission-speaker-pill">
+                            <Volume2 size={12} /> REACTING
+                          </div>
+                        </>
+                      );
+                    })()
                   ) : phase === 'cleared' ? (
                     <>
                       <CharacterSprite
@@ -396,19 +478,24 @@ export default function MissionControl({ day }: { day: number }) {
                       </div>
                     </>
                   ) : (
-                    <>
-                      <CharacterSprite
-                        character={currentDialogue.speaker}
-                        size="xl"
-                        expression={currentDialogue.expression || 'talking'}
-                        speaking={true}
-                      />
-                      <span>{currentDialogue.name.toUpperCase()}</span>
-                      <small>{currentDialogue.role}</small>
-                      <div className="mission-speaker-pill">
-                        <Volume2 size={12} /> SPEAKING
-                      </div>
-                    </>
+                    (() => {
+                      const details = getRoleDetails(currentDialogue.role);
+                      return (
+                        <>
+                          <CharacterSprite
+                            character={currentDialogue.speaker}
+                            size="xl"
+                            expression={currentDialogue.expression || 'talking'}
+                            speaking={true}
+                          />
+                          <span>{currentDialogue.name.toUpperCase()} ({details.role.toUpperCase()})</span>
+                          <small>{details.nickname ? `"${details.nickname}"` : details.role}</small>
+                          <div className="mission-speaker-pill">
+                            <Volume2 size={12} /> SPEAKING
+                          </div>
+                        </>
+                      );
+                    })()
                   )}
                 </div>
 
@@ -449,7 +536,12 @@ export default function MissionControl({ day }: { day: number }) {
                           >
                             {currentDialogue.name}
                           </span>
-                          <span className="speaker-role-label">{currentDialogue.role}</span>
+                          <span className="speaker-role-label">
+                            {(() => {
+                              const d = getRoleDetails(currentDialogue.role);
+                              return d.nickname ? `(${d.role}) · "${d.nickname}"` : `(${d.role})`;
+                            })()}
+                          </span>
                         </div>
                         <p className="mission-vn-speech-text">“{currentDialogue.text}”</p>
                       </div>

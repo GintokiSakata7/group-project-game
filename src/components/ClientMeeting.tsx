@@ -344,7 +344,8 @@ export default function ClientMeeting() {
   const [score, setScore] = useState(0);
   const [chosenPrice, setChosenPrice] = useState(5000);
   const [chosenScope, setChosenScope] = useState(['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo']);
-  const [callAnswered, setCallAnswered] = useState(false);
+  const initialAnswered = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('answered') === 'true';
+  const [callAnswered, setCallAnswered] = useState(initialAnswered);
   const [callSeconds, setCallSeconds] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);

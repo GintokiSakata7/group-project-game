@@ -33,6 +33,20 @@ export interface MissionChoice {
   reactions?: DialogueLine[];
 }
 
+export type MissionType =
+  | 'standup'
+  | 'code_audit'
+  | 'sprint_triage'
+  | 'staging_test'
+  | 'client_escalation'
+  | 'qa_triage';
+
+export interface SimulationObjective {
+  id: string;
+  label: string;
+  hint: string;
+}
+
 export interface FounderMission {
   id: string;
   day: number;
@@ -45,6 +59,10 @@ export interface FounderMission {
   attendees: CharacterId[];
   dialogue: DialogueLine[];
   choices: MissionChoice[];
+  missionType?: MissionType;
+  appTarget?: 'repo' | 'sprint' | 'preview' | 'browser' | 'chat' | 'qa';
+  appActionLabel?: string;
+  simulationObjectives?: SimulationObjective[];
 }
 
 export const founderMissions: FounderMission[] = [
@@ -58,6 +76,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Technical Lead',
     attendees: ['kunal', 'aarav', 'varun', 'meera', 'nikhil'],
     briefing: 'You call the first delivery stand-up. Kunal arrives with a speaker. Aarav says he has already finished the frontend. Meera asks what “finished” means. Varun claims the architecture is 90% complete, but the repository contains one README, three diagrams and a folder named FINAL_ARCHITECTURE_NEW. The app has not been opened once.',
+    missionType: 'standup',
+    appTarget: 'chat',
+    appActionLabel: 'Run Tech Stand-up',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Confront Varun on the 90% architecture claim', hint: 'Demand evidence of working code' },
+      { id: 'obj2', label: 'Force an immediate localhost:3000 boot test', hint: 'Verify if the dev server even starts' },
+      { id: 'obj3', label: 'Establish strict Day 1 acceptance criteria', hint: 'Lock in deliverable commitments before lunch' },
+    ],
     dialogue: [
       {
         speaker: 'kunal',
@@ -229,6 +255,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Full-Stack Vibe Coder',
     attendees: ['aarav', 'meera', 'varun', 'kunal'],
     briefing: 'Aarav has pushed a commit titled "complete website basically final". It changes 38 files, adds 11 dependencies and includes a comment that says // TODO: make this work later. He has already posted a rocket emoji in the group chat.',
+    missionType: 'code_audit',
+    appTarget: 'repo',
+    appActionLabel: 'Inspect PR in Code Studio',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Open Home.tsx in Code Studio to inspect Aarav’s 1,247-line PR', hint: 'Inspect file tree and diff' },
+      { id: 'obj2', label: 'Hunt & neutralize 3 code smells in the repository', hint: 'Click Flag Smell buttons to cut tech debt' },
+      { id: 'obj3', label: 'Decide PR outcome: Merge miracle, demand components, or patch yourself', hint: 'Balance tech debt vs speed' },
+    ],
     dialogue: [
       {
         speaker: 'aarav',
@@ -257,6 +291,20 @@ export const founderMissions: FounderMission[] = [
         role: 'Technical Lead',
         expression: 'exhausted',
         text: 'He imported three different date-picker libraries. None of which support leap years or Indian Standard Time.',
+      },
+      {
+        speaker: 'nikhil',
+        name: 'Nikhil',
+        role: 'Backend Developer',
+        expression: 'neutral',
+        text: '...and one of the packages sends telemetry to a Minecraft server in Belarus. do not merge.',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'smug',
+        text: 'Bro, that Belarus server gives +20 developer aura! The animations are silky smooth!',
       },
       {
         speaker: 'kunal',
@@ -351,27 +399,35 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Backend Developer',
     attendees: ['meera', 'varun', 'aarav', 'kunal', 'nikhil'],
     briefing: 'The WhatsApp enquiry endpoint is assigned to Nikhil. His status says "last seen recently". The last message was sent from a railway platform. Varun says the backend is done. There is no endpoint URL.',
+    missionType: 'sprint_triage',
+    appTarget: 'sprint',
+    appActionLabel: 'Triage Tasks on Sprint Board',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Inspect Nikhil’s blocked backend API task on the board', hint: 'Nikhil is offline (seen)' },
+      { id: 'obj2', label: 'Resolve the sprint blocker holding up Aarav’s frontend', hint: 'Reassign or create mock API stubs' },
+      { id: 'obj3', label: 'Restore verified progress velocity on sprint deliverables', hint: 'Keep WhatsApp enquiry flow on track' },
+    ],
     dialogue: [
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'exhausted',
-        text: 'Where is Nikhil? The WhatsApp enquiry endpoint is blocked. The frontend has nothing to send data to.',
+        text: 'Where is Nikhil? The WhatsApp enquiry endpoint is completely blocked. The frontend has literally nothing to send data to.',
       },
       {
         speaker: 'varun',
         name: 'Varun',
         role: 'Technical Lead',
         expression: 'talking',
-        text: 'Nikhil\'s architectural paradigm is highly decentralized. He operates in asynchronous bursts of pure backend logic.',
+        text: 'Nikhil\'s architectural paradigm is highly decentralized. He operates in asynchronous bursts of pure backend logic from transit corridors.',
       },
       {
         speaker: 'aarav',
         name: 'Aarav',
         role: 'Full-Stack Vibe Coder',
-        expression: 'talking',
-        text: 'His Slack status just changed to "in an auto-rickshaw near Thane". His last commit was 14 hours ago titled `fixed stuff maybe`.',
+        expression: 'shocked',
+        text: 'His Slack status says "in an auto near Thane on 2% battery". I opened his test database and the table is literally named `temp_stuff_do_not_delete_plz_final_v3` with 400 columns, half of which are just the letter "x"!',
       },
       {
         speaker: 'kunal',
@@ -385,14 +441,21 @@ export const founderMissions: FounderMission[] = [
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'shocked',
-        text: 'Do NOT ping him on Instagram, Kunal! We have a client deadline in 5 days! We need an actual URL!',
+        text: 'Do NOT ping him on Instagram, Kunal! I am holding a printed stack trace thicker than the Bhagavad Gita! We have a client deadline in 5 days! We need an actual runnable URL!',
       },
       {
         speaker: 'nikhil',
         name: 'Nikhil',
         role: 'Backend Developer',
         expression: 'neutral',
-        text: '...on railway platform. battery 4%. what is breaking.',
+        text: '...on railway platform. phone charger held together with cello-tape. hot-spotting 2G from under a flyover. what is breaking.',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'talking',
+        text: 'Nikhil, what is breaking?! The entire company! You have a foreign key pointing to `null` with a code comment that says: `// god will resolve this`!',
       },
     ],
     choices: [
@@ -480,6 +543,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client’s Nephew · Self-appointed CTO',
     attendees: ['prakash', 'bunty', 'kunal', 'meera', 'aarav'],
     briefing: 'Bunty has sent a voice note titled "tiny change final.wav". It requests live delivery tracking, customer loyalty points, an AI chatbot and a 3D logo. The voice note is 4 minutes and 38 seconds long.',
+    missionType: 'client_escalation',
+    appTarget: 'browser',
+    appActionLabel: 'Review Scope in Client Desk',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Examine Bunty’s incoming Web4 & crypto memo in Client Desk', hint: 'Inspect the incoming client request' },
+      { id: 'obj2', label: 'Counter Bunty’s scope creep with executive clarity', hint: 'Protect the 7-day contract boundary' },
+      { id: 'obj3', label: 'Lock down Phase 1 scope without losing client trust', hint: 'Focus Mr. Prakash on commercial catering orders' },
+    ],
     dialogue: [
       {
         speaker: 'bunty',
@@ -500,35 +571,42 @@ export const founderMissions: FounderMission[] = [
         name: 'Bunty',
         role: 'Client\'s Nephew · Self-appointed CTO',
         expression: 'talking',
-        text: 'Uncle, you don\'t get Gen-Z! Here\'s the vision: live GPS drone delivery tracking, crypto loyalty tokens called $BIRYANI, and an AI chatbot trained on Amitabh Bachchan dialogues!',
+        text: 'Uncle, you don\'t get Gen-Z! Here\'s the vision: live GPS drone delivery tracking, an AI model that predicts biryani spice levels based on the mother-in-law\'s zodiac sign, and an NFT loyalty program called $BIRYANI on Solana!',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'talking',
+        text: 'Wait, hold on... does the drone play bass-boosted dubstep when it drops the garlic naan? Because if so, I can vibe-code this in 35 minutes using 14 npm packages!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'shocked',
-        text: 'Bunty. The signed contract is ₹500 for a responsive website and a WhatsApp button. You\'re describing a $20 million Series A startup.',
+        text: 'Aarav, sit down and do not touch npm. Bunty, the signed contract is ₹500 for a static website. You are describing a $20 million DARPA defence contract.',
       },
       {
         speaker: 'kunal',
         name: 'Kunal',
         role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Wait, wait! Before Meera throws her laptop at Bunty: as Chief Motivation Officer, I must acknowledge the vision! But as Client Relations, look at our sprint reality: Aarav has 18 broken CSS divs on localhost, Varun is still diagramming the Kafka cluster, and Nikhil is somewhere in Thane on 2% battery! If we promise $BIRYANI coin today, Mr. Prakash will cancel the advance before dinner! Founder, how do we politely defuse Bunty\'s YouTube startup fever?!',
+        text: 'Wait, wait! Before Meera throws her mechanical keyboard at Bunty: as Chief Motivation Officer, I must acknowledge the vision! But as Client Relations, look at our sprint reality: Aarav has 18 broken CSS divs on localhost, Varun is still diagramming the Kafka cluster, and Nikhil is somewhere in Thane on 2% battery! If we promise $BIRYANI coin today, Mr. Prakash will cancel the advance before dinner! Founder, how do we politely defuse Bunty\'s YouTube startup fever?!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'exhausted',
-        text: 'Kunal, stop helping him.',
+        text: 'Kunal, stop validating his fever dreams.',
       },
       {
         speaker: 'bunty',
         name: 'Bunty',
         role: 'Client\'s Nephew · Self-appointed CTO',
         expression: 'talking',
-        text: 'Come on founder, it\'s just a couple of if-else statements right? Can we squeeze this in by Tuesday?',
+        text: 'Come on founder, it\'s just like two if-else statements and an API call to Elon Musk! Can we squeeze this in by Tuesday?',
       },
     ],
     choices: [
@@ -616,41 +694,56 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client · Royal Feast Catering',
     attendees: ['prakash', 'bunty', 'varun', 'meera'],
     briefing: 'Mr. Prakash calls. He says Bunty has promised a customer app to the family. The signed scope is a responsive website and WhatsApp enquiry flow. The client asks whether the app can be "added quietly" without changing the price.',
+    missionType: 'staging_test',
+    appTarget: 'preview',
+    appActionLabel: 'Smoke Test in Live Staging',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Reproduce broken WhatsApp button on localhost:3000', hint: 'Click the button to see window.openWhatsAppEnquiry error' },
+      { id: 'obj2', label: 'Patch the enquiry flow and replace missing biryani hero image', hint: 'Use Aarav’s Vibe Lab patch controls' },
+      { id: 'obj3', label: 'Drop Mr. Prakash’s live blood pressure gauge into the safe zone', hint: 'Ensure responsive catering flow works' },
+    ],
     dialogue: [
       {
         speaker: 'prakash',
         name: 'Mr. Prakash',
         role: 'Client · Royal Feast Catering',
         expression: 'talking',
-        text: 'Founder, namaste. My sister called me from Nagpur. She says Bunty promised her that our catering company has a native iOS app in the App Store by Friday.',
+        text: 'Founder, namaste. My sister called me from Nagpur. She says Bunty announced to the 84-person family WhatsApp group that Royal Feast has a native iOS app in the App Store by Friday.',
       },
       {
         speaker: 'bunty',
         name: 'Bunty',
         role: 'Client\'s Nephew · Self-appointed CTO',
         expression: 'smug',
-        text: 'Uncle, I was doing strategic brand evangelism! Everyone has an app! Steve Jobs didn\'t wait for paperwork!',
+        text: 'Uncle, I was doing strategic brand evangelism! Everyone has an app! If Tim Cook loves authentic mutton biryani, he will personally feature us in the Apple keynote!',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'shocked',
+        text: 'Bunty, our mobile web layout currently wraps the word "Catering" into three separate lines on an iPhone 13! If someone tries to compile an iOS build right now, Tim Cook will issue a cease-and-desist to Uncle\'s kitchen!',
       },
       {
         speaker: 'varun',
         name: 'Varun',
         role: 'Technical Lead',
         expression: 'talking',
-        text: 'From an enterprise governance perspective, developing, signing, and submitting an iOS application through Apple App Store review requires a minimum of 14 business days, enterprise DUNS registration, and several prayers.',
+        text: 'From an enterprise governance perspective, Apple App Store review requires a $99 developer certificate, enterprise DUNS registration, and three weeks of Apple review bureaucracy.',
       },
       {
         speaker: 'prakash',
         name: 'Mr. Prakash',
         role: 'Client · Royal Feast Catering',
         expression: 'talking',
-        text: 'I don\'t know what DUNS is, Varun beta. I only know Bunty told the whole family WhatsApp group that we are launching on Apple.',
+        text: 'I don\'t know what DUNS is, Varun beta. I only know Bunty\'s bua in Nagpur has already downloaded three random calculator apps thinking one of them is Royal Feast!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'exhausted',
-        text: 'Founder, the contract in my folder explicitly says "Responsive Web App". There is zero mention of iOS.',
+        text: 'Founder, the contract in my folder explicitly says "Responsive Web App". I highlighted it with neon pink marker. Zero mention of iOS.',
       },
       {
         speaker: 'prakash',
@@ -745,6 +838,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'QA Engineer',
     attendees: ['meera', 'aarav', 'varun', 'kunal'],
     briefing: 'Meera has blocked the build. Aarav says the payment button is "a visual prototype". Meera says it is a button that takes users to a blank page. They have been debating the definition of "done" for 27 minutes.',
+    missionType: 'staging_test',
+    appTarget: 'preview',
+    appActionLabel: 'Calibrate Vibe Lab in Staging',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Open Aarav’s Vibe Lab inside Live Staging', hint: 'Inspect spinning 3D biryani cubes and particles' },
+      { id: 'obj2', label: 'Tame chaos slider and neon filters to achieve 60 FPS', hint: 'Balance aesthetic flair with stability' },
+      { id: 'obj3', label: 'Sign off styling compromise between Aarav & Meera', hint: 'Avert civil war in group chat' },
+    ],
     dialogue: [
       {
         speaker: 'meera',
@@ -772,21 +873,21 @@ export const founderMissions: FounderMission[] = [
         name: 'Aarav',
         role: 'Full-Stack Vibe Coder',
         expression: 'smug',
-        text: 'The minimalism builds anticipation! The customer reflects on their culinary choices before the transaction executes!',
+        text: 'The minimalism builds anticipation! The customer reflects on their culinary choices with ambient sitar frequencies before the transaction executes! It\'s mindful e-commerce!',
       },
       {
         speaker: 'varun',
         name: 'Varun',
         role: 'Technical Lead',
         expression: 'talking',
-        text: 'Theoretically, a blank state can be classified as an unhydrated component boundary. If we wrap it in a Suspense boundary with a fallback spinner—',
+        text: 'Theoretically, a blank state can be classified as an unhydrated component boundary. If we wrap the void in an asymptotic Suspense fallback spinner with Fibonacci retry intervals—',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'shocked',
-        text: 'IT NEEDS TO ACTUALLY PROCESS THE ORDER, VARUN! This is a catering website, not an existential art installation!',
+        text: 'IT NEEDS TO ACTUALLY PROCESS THE ORDER, VARUN! This is a catering website in Dadar, not an art gallery in South Bombay! The wedding guests will not meditate on an unhydrated component boundary while starving!',
       },
       {
         speaker: 'kunal',
@@ -888,6 +989,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client · Royal Feast Catering',
     attendees: ['prakash', 'bunty', 'kunal', 'meera', 'varun'],
     briefing: 'Mr. Prakash wants a preview today. The homepage looks decent, the catalogue is half populated and the WhatsApp button works in the developer’s browser. Bunty has invited three relatives to the call.',
+    missionType: 'staging_test',
+    appTarget: 'preview',
+    appActionLabel: 'Audit Preview Gate in Staging',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Switch between Desktop, Tablet, and Mobile viewports', hint: 'Audit layout integrity across devices' },
+      { id: 'obj2', label: 'Hide unverified mock screens from client staging view', hint: 'Only show working menu items' },
+      { id: 'obj3', label: 'Lock in client satisfaction score above 75%', hint: 'A working flow beats 10 broken promises' },
+    ],
     dialogue: [
       {
         speaker: 'prakash',
@@ -901,21 +1010,28 @@ export const founderMissions: FounderMission[] = [
         name: 'Bunty',
         role: 'Client\'s Nephew · Self-appointed CTO',
         expression: 'smug',
-        text: 'I connected the laptop to the 65-inch TV in the catering hall! Everyone is watching!',
+        text: 'I connected the laptop to the 65-inch 4K TV in the catering hall! I put it on Dynamic Cinema Mode! The samosas look IMAX quality!',
       },
       {
         speaker: 'kunal',
         name: 'Kunal',
         role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Wait, 65-inch TV?! On a live kitchen display?! Look at our progress status: Aarav only filled in 3 demo items—"Sample Samosa", "Test Biryani", and "Lorem Ipsum Naan"! If Mr. Prakash sees "Lorem Ipsum Naan" on a 65-inch screen in front of his kitchen halwais, my Chief Motivation career is over! Founder, what narrative do I present on this demo?!',
+        text: 'Wait, 65-inch 4K TV in front of the kitchen halwais?! Look at our progress status: Aarav only filled in 3 demo items—"Sample Samosa", "Test Biryani", and "Lorem Ipsum Naan"!',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'smug',
+        text: '"Lorem Ipsum Naan" is an artisanal placeholder with gluten-free CSS drop shadows! The typography is elite!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'talking',
-        text: 'Wait. The homepage is solid, but the catalogue only has 3 demo items: "Sample Samosa", "Test Biryani", and "Lorem Ipsum Naan". The rest is mock data.',
+        text: 'Aarav, the head halwai is holding a tandoor skewer. If he reads "Lorem Ipsum Naan" in 4K resolution, you will be explaining CSS drop shadows to him in person.',
       },
       {
         speaker: 'varun',
@@ -929,7 +1045,7 @@ export const founderMissions: FounderMission[] = [
         name: 'Mr. Prakash',
         role: 'Client · Royal Feast Catering',
         expression: 'talking',
-        text: 'Can I see my actual menu on my screen, or are we just looking at slides?',
+        text: 'Varun beta, can I see my actual menu on my screen, or did I pay ₹500 to look at mathematical carbohydrates?',
       },
     ],
     choices: [
@@ -1024,6 +1140,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Technical Lead',
     attendees: ['varun', 'meera', 'nikhil', 'aarav'],
     briefing: 'Varun reports that frontend and backend are fully integrated. The only evidence is a screenshot of two windows open next to each other. The API endpoint in the browser says 404. Varun says the endpoint is shy.',
+    missionType: 'sprint_triage',
+    appTarget: 'sprint',
+    appActionLabel: 'Flatten Dependency Chain on Board',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Inspect Varun’s 14-service circular dependency web on Sprint Board', hint: 'Circular blockers stop testing' },
+      { id: 'obj2', label: 'Authorise monolithic shortcut for rapid delivery', hint: 'Keep architecture grounded in 7-day reality' },
+      { id: 'obj3', label: 'Unblock Meera’s QA verification pipeline', hint: 'Enable testing on single repo codebase' },
+    ],
     dialogue: [
       {
         speaker: 'varun',
@@ -1065,14 +1189,21 @@ export const founderMissions: FounderMission[] = [
         name: 'Nikhil',
         role: 'Backend Developer',
         expression: 'neutral',
-        text: '...server port in config was 3000 not 8080. changed in git. pull again.',
+        text: '...server was configured on port 8080. aarav was pinging port 3000. also my local postgres was turned off to save electricity.',
+      },
+      {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'shocked',
+        text: 'TO SAVE ELECTRICITY?! We are building a commercial application and the database is running on solar vibes?!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'talking',
-        text: 'Founder, do we verify this right now or do we let Varun live in his theoretical utopia?',
+        text: 'Varun\'s "syntactic harmony" is literally just two files failing silently in parallel. Founder, do we test the actual network call right now or do we let Varun live in his theoretical utopia?',
       },
     ],
     choices: [
@@ -1160,6 +1291,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client’s Nephew · Scope Expansion Specialist',
     attendees: ['bunty', 'prakash', 'kunal', 'meera'],
     briefing: 'Bunty sends a screenshot of a competitor website and says: "Just make ours like this." The screenshot contains 26 features, three animations and a loyalty programme. The contract has two days left.',
+    missionType: 'client_escalation',
+    appTarget: 'browser',
+    appActionLabel: 'Negotiate Scope in Client Desk',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Examine Mr. Prakash’s last-minute live tracking request', hint: 'Assess scope impact on remaining 2 days' },
+      { id: 'obj2', label: 'Negotiate Phase 2 deferral or scope expansion budget', hint: 'Do not compromise release quality' },
+      { id: 'obj3', label: 'Keep team fatigue in sustainable range', hint: 'Protect developers from burnout' },
+    ],
     dialogue: [
       {
         speaker: 'bunty',
@@ -1183,18 +1322,32 @@ export const founderMissions: FounderMission[] = [
         text: 'It\'s just one last tiny change! My friend at university says React can do 3D in like two lines of code using Three.js!',
       },
       {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'shocked',
+        text: 'I ran `npm install three @react-three/fiber` to test it! My MacBook fan currently sounds like an IndiGo flight taking off from Runway 27, and my battery dropped from 100% to 14% in four minutes!',
+      },
+      {
+        speaker: 'meera',
+        name: 'Meera',
+        role: 'QA Engineer',
+        expression: 'shocked',
+        text: 'The bundle size is 112 megabytes, Aarav! The client\'s customers will run out of mobile data before the first kebab loads!',
+      },
+      {
         speaker: 'kunal',
         name: 'Kunal',
         role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: '3D rotating kebabs?! Bunty, look at our sprint reality: we have 36 hours left, Nikhil just merged 400 lines of raw backend endpoints from an auto-rickshaw, Aarav is recovering from a CSS overdose, and Meera is patrolling the git commit log with a baseball bat! If we install Three.js now, the whole website will crash on mobile! Founder, give Mr. Prakash the definitive verdict on this 3D meat madness!',
+        text: '3D rotating kebabs?! Look at our sprint reality: we have 36 hours left, Nikhil just merged raw endpoints from an auto-rickshaw, Aarav\'s laptop is radiating enough thermal energy to cook an actual biryani, and Meera is patrolling git with a cricket bat! If we ship this now, Mr. Prakash\'s phone will melt! Founder, what is the executive verdict?!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'exhausted',
-        text: 'If anyone touches the production bundle to add 3D rotating meat, I will delete our git remote.',
+        text: 'If anyone touches the production bundle to add 3D rotating meat, I will delete our git remote and format the hard drive.',
       },
       {
         speaker: 'prakash',
@@ -1289,6 +1442,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'QA Engineer',
     attendees: ['meera', 'aarav', 'varun', 'kunal'],
     briefing: 'Meera has reported 23 issues. Three are critical, six are major, nine are minor and five concern typography. She has attached a 41-page report and a screenshot of a button that is allegedly "too cheerful".',
+    missionType: 'qa_triage',
+    appTarget: 'qa',
+    appActionLabel: 'Triage Defect Registry in QA Lab',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Review Meera’s 23 logged defects in QA Lab', hint: 'Inspect critical vs major vs cosmetic' },
+      { id: 'obj2', label: 'Prioritise critical user-flow blockers over 1px borders', hint: 'Focus team actions on real functional bugs' },
+      { id: 'obj3', label: 'Achieve release confidence threshold > 65%', hint: 'Clear release gate before Day 6' },
+    ],
     dialogue: [
       {
         speaker: 'meera',
@@ -1316,28 +1477,28 @@ export const founderMissions: FounderMission[] = [
         name: 'Varun',
         role: 'Technical Lead',
         expression: 'talking',
-        text: 'Can we examine defect #17? You noted: "Button shadow has excessive optimism and does not reflect enterprise gravitas".',
+        text: 'Can we examine defect #17? You noted: "Button shadow has excessive optimism and violates Indian cultural modesty".',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'talking',
-        text: 'Yes. The drop shadow is #38bdf8 with a 12px blur radius. It looks like a candy store, not a premier royal feast.',
+        text: 'Yes. The drop shadow is #38bdf8 with a 16px blur radius and a neon cyan glow. It looks like a floating casino on the Mandovi River in Goa, not a premier royal feast in Dadar.',
       },
       {
         speaker: 'aarav',
         name: 'Aarav',
         role: 'Full-Stack Vibe Coder',
         expression: 'exhausted',
-        text: 'I spent an hour tweaking that shadow! It gives the button emotional levitation!',
+        text: 'I spent two hours tweaking that blur radius! It gives the button emotional levitation!',
       },
       {
         speaker: 'kunal',
         name: 'Kunal',
         role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Aarav, your button has emotional levitation, but clicking it crashes Chrome on Android! Meera has 14 blocker bugs open, Varun is still explaining why the database is morally superior to MongoDB, and Mr. Prakash is testing the site with his Kanpur relatives in 12 hours! Founder, how do we prioritize Meera\'s defect avalanche?!',
+        text: 'Aarav, your button has emotional levitation, but clicking it crashes Chrome on Android! Meera has 14 blocker bugs open, Varun is still explaining why our schema is morally superior to MongoDB, and Mr. Prakash is testing the site with his Kanpur relatives in 12 hours! Founder, how do we prioritize Meera\'s defect avalanche?!',
       },
     ],
     choices: [
@@ -1425,6 +1586,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Backend Developer',
     attendees: ['nikhil', 'meera', 'varun', 'aarav'],
     briefing: 'Nikhil appears online and uploads latest_final_REAL_final_v9.zip. He says the backend is complete. The archive is 480 MB. The README says "run after extracting maybe". Meera has already put on gloves.',
+    missionType: 'code_audit',
+    appTarget: 'repo',
+    appActionLabel: 'Audit Midnight PR in Code Studio',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Inspect Nikhil’s 4,000-line 3:42 AM pull request in Code Studio', hint: 'Review commit diff and commit message' },
+      { id: 'obj2', label: 'Run sanity test suite to verify database stability', hint: 'Check for missing schema migrations' },
+      { id: 'obj3', label: 'Approve with Meera’s audit or demand doc comments', hint: 'Balance code quality with deadline pressure' },
+    ],
     dialogue: [
       {
         speaker: 'nikhil',
@@ -1561,6 +1730,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client Relations ("Chief Motivation Officer")',
     attendees: ['kunal', 'meera', 'aarav', 'varun'],
     briefing: 'Kunal has called an emergency "alignment summit". Aarav wants to add dark mode. Varun wants to refactor routing. Meera wants the payment button tested. Nikhil has gone offline again. The deadline is tomorrow.',
+    missionType: 'sprint_triage',
+    appTarget: 'sprint',
+    appActionLabel: 'Enforce Feature Freeze on Board',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Lock sprint board: zero new feature cards allowed', hint: 'Move in-progress cards to review' },
+      { id: 'obj2', label: 'Deny Aarav’s emergency dark-mode branch', hint: 'Stability over aesthetic experiments' },
+      { id: 'obj3', label: 'Prepare final release candidate artifact', hint: 'Confirm all deliverables marked done' },
+    ],
     dialogue: [
       {
         speaker: 'kunal',
@@ -1574,28 +1751,35 @@ export const founderMissions: FounderMission[] = [
         name: 'Aarav',
         role: 'Full-Stack Vibe Coder',
         expression: 'talking',
-        text: 'Quick question: what if we add Dark Mode before tomorrow? 92% of software engineers prefer dark mode! It\'ll take me 20 minutes!',
+        text: 'Quick question: what if we add Dark Mode before tomorrow? 94% of software engineers and midnight vampires prefer dark mode! It\'ll take me 20 minutes!',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'shocked',
-        text: 'Aarav, the client is a 54-year-old catering business owner in Dadar! He does not care about OLED true blacks! He cares if customers can book paneer tikka!',
+        text: 'Aarav, the client is a 54-year-old catering business owner in Dadar! He does not care about OLED true blacks! He cares if wedding parties can book butter chicken!',
       },
       {
         speaker: 'varun',
         name: 'Varun',
         role: 'Technical Lead',
         expression: 'talking',
-        text: 'I also have a small refactor: replacing our routing library with a custom recursive state machine. It will reduce cognitive entropy.',
+        text: 'I also have a minor architectural refactor: replacing our router with a custom monadic state machine written in pure lambda calculus. It will only take 18 hours.',
+      },
+      {
+        speaker: 'nikhil',
+        name: 'Nikhil',
+        role: 'Backend Developer',
+        expression: 'neutral',
+        text: '...if anyone touches git main branch i am deleting my SSH key and moving to my village in Konkan.',
       },
       {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'exhausted',
-        text: 'Founder. If anyone touches routing or adds dark mode 24 hours before launch, the entire app will implode. Enforce the feature freeze now!',
+        text: 'Founder. Enforce the feature freeze now before this company commits collective seppuku!',
       },
     ],
     choices: [
@@ -1683,6 +1867,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client Liaison (Self-appointed)',
     attendees: ['kunal', 'meera', 'aarav', 'varun'],
     briefing: 'The client demo is in two hours. Kunal has prepared a 34-slide deck. Aarav says the site works locally. Varun says the architecture is ready. Meera asks whether anyone has tried the production link.',
+    missionType: 'staging_test',
+    appTarget: 'preview',
+    appActionLabel: 'Final Dry Run in Live Staging',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Walk through complete catering order flow in Live Staging', hint: 'Test menu selection and contact submission' },
+      { id: 'obj2', label: 'Verify client happiness gauge reaches maximum green', hint: 'Check responsiveness across viewports' },
+      { id: 'obj3', label: 'Prepare live demonstration strategy with Kunal & Varun', hint: 'Align talking points before Prakash joins' },
+    ],
     dialogue: [
       {
         speaker: 'kunal',
@@ -1713,6 +1905,13 @@ export const founderMissions: FounderMission[] = [
         text: 'The deployment pipeline has executed successfully. DNS propagation to edge CDN nodes has reached global steady state.',
       },
       {
+        speaker: 'nikhil',
+        name: 'Nikhil',
+        role: 'Backend Developer',
+        expression: 'neutral',
+        text: '...tested endpoint from 5G hotspot. returns 200 OK. do not touch anything. if anyone pushes another commit i will personally come to the office and cut the router cable.',
+      },
+      {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
@@ -1724,7 +1923,7 @@ export const founderMissions: FounderMission[] = [
         name: 'Kunal',
         role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Mr. Prakash has his chequebook open, but Bunty has a notepad labeled "Phase 2 suggestions". Founder, how do we structure our live demo rehearsal before the client arrives?!',
+        text: 'Mr. Prakash has his chequebook open, but Bunty has a notepad labeled "Phase 2 suggestions"! Founder, how do we structure our dry run before Uncle Prakash arrives?!',
       },
     ],
     choices: [
@@ -1812,6 +2011,14 @@ export const founderMissions: FounderMission[] = [
     characterRole: 'Client · Royal Feast Catering',
     attendees: ['prakash', 'bunty', 'kunal', 'meera', 'aarav'],
     briefing: 'Mr. Prakash joins the call with Bunty and two relatives. He wants to know if the website is ready, whether the AI chatbot is included and whether the logo can be changed to a rotating 3D biryani. This is the final acceptance conversation.',
+    missionType: 'standup',
+    appTarget: 'chat',
+    appActionLabel: 'Enter Final Client Delivery Call',
+    simulationObjectives: [
+      { id: 'obj1', label: 'Present Phase 1 delivery to Mr. Prakash & Bunty', hint: 'Show real evidence and working features' },
+      { id: 'obj2', label: 'Deflect Bunty’s unexpected live test ambush', hint: 'Rely on verified quality and team preparation' },
+      { id: 'obj3', label: 'Collect ₹35,000 milestone invoice payment', hint: 'Secure client sign-off and founder victory!' },
+    ],
     dialogue: [
       {
         speaker: 'prakash',
@@ -1828,11 +2035,18 @@ export const founderMissions: FounderMission[] = [
         text: 'Before you start, did you guys add the 3D rotating biryani pot and the AI chatbot that talks like Amitabh Bachchan?!',
       },
       {
+        speaker: 'aarav',
+        name: 'Aarav',
+        role: 'Full-Stack Vibe Coder',
+        expression: 'talking',
+        text: 'Bunty, if we added Amitabh Bachchan AI, the chatbot would charge us licensing fees higher than Uncle Prakash\'s entire annual turnover!',
+      },
+      {
         speaker: 'meera',
         name: 'Meera',
         role: 'QA Engineer',
         expression: 'talking',
-        text: 'Founder, the stage is yours. Present the delivered project.',
+        text: 'Founder, the stage is yours. Present the delivered project before Bunty proposes quantum computing.',
       },
       {
         speaker: 'kunal',

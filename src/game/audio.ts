@@ -266,6 +266,66 @@ class SoundEngine {
     osc.stop(now + 0.15);
   }
 
+  public playCoffee() {
+    this.ensureUnlocked();
+    if (!this.ctx || !this.sfxGain || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    // Pleasant warm coffee chord with slight bubbling modulation
+    const chord = [392, 493.88, 587.33]; // G4, B4, D5
+    chord.forEach((freq, idx) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+      gain.gain.setValueAtTime(0.14, now + idx * 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.35);
+      osc.connect(gain);
+      gain.connect(this.sfxGain!);
+      osc.start(now + idx * 0.05);
+      osc.stop(now + idx * 0.05 + 0.4);
+    });
+  }
+
+  public playFoodDelivery() {
+    this.ensureUnlocked();
+    if (!this.ctx || !this.sfxGain || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    // Two-tone cheerful doorbell: Ding (E5) - Dong (C5)
+    const bellNotes = [{ freq: 659.25, time: 0, dur: 0.35 }, { freq: 523.25, time: 0.22, dur: 0.55 }];
+    bellNotes.forEach(({ freq, time, dur }) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + time);
+      gain.gain.setValueAtTime(0.2, now + time);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
+      osc.connect(gain);
+      gain.connect(this.sfxGain!);
+      osc.start(now + time);
+      osc.stop(now + time + dur + 0.05);
+    });
+  }
+
+  public playReelLike() {
+    this.ensureUnlocked();
+    if (!this.ctx || !this.sfxGain || this.isMuted) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(550, now);
+    osc.frequency.exponentialRampToValueAtTime(1100, now + 0.08);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.connect(gain);
+    gain.connect(this.sfxGain);
+    osc.start(now);
+    osc.stop(now + 0.11);
+  }
+
   // --- KUNAL'S PROCEDURAL MUSIC ENGINE ---
 
   public playTrack(index?: number) {

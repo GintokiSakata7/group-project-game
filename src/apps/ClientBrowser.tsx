@@ -3,6 +3,7 @@ import { ArrowUpRight, Bookmark, ExternalLink, FileText, Globe, MessageCircle, S
 import { useGameStore } from '../game/store';
 import { AppHeading, Pill } from './shared';
 import { CharacterSprite } from '../components/CharacterSprite';
+import ActiveMissionHUD from '../components/ActiveMissionHUD';
 
 export default function ClientBrowser() {
   const { day, metrics, messages, scopeAccepted, sendMessage, contractValue } = useGameStore();
@@ -38,6 +39,8 @@ export default function ClientBrowser() {
         subtitle="Owner · Royal Feast Catering · Signed on Day 1"
         right={<Pill tone={metrics.clientTrust > 55 ? 'good' : 'warning'}>Trust: {Math.round(metrics.clientTrust)}%</Pill>}
       />
+
+      <ActiveMissionHUD app="browser" />
 
       <div className="browser-tabs">
         <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>
@@ -186,7 +189,7 @@ export default function ClientBrowser() {
           <div className="client-message-list">
             {clientMessages.map((message) => (
               <div key={message.id} className={`client-message ${message.senderId === 'player' ? 'sent' : ''}`}>
-                <span>{message.senderName}</span>
+                <span>{message.senderName}{!message.senderName.includes('(') ? (message.senderId === 'player' ? ' (Founder)' : ' (Client)') : ''}</span>
                 <p>{message.text}</p>
                 <small>Day {message.day} · {message.time}</small>
               </div>

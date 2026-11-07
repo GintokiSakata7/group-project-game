@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, CheckCircle2, Laptop, Monitor, Sparkles, Users, Zap, X, Globe, Music, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Laptop, Monitor, Sparkles, Users, Zap, X, Globe, Music, Volume2, VolumeX, Coffee, UtensilsCrossed, Flame, MessageSquareText } from 'lucide-react';
 import { useGameStore } from '../game/store';
 import { CharacterSprite, type CharacterId, type Expression } from './CharacterSprite';
 import type { DailyReport, Employee, GameEvent } from '../game/types';
@@ -101,10 +101,11 @@ function DailyReportModal({ report, close }: { report: DailyReport; close: () =>
 }
 
 export default function OfficeHub() {
-  const { companyName, day, actionsLeft, metrics, employees, tasks, defects, pendingEvent, dailyReports, completedMissionIds, openDesktop, performAction, resolveEvent, endDay, discoverTrait } = useGameStore();
+  const { companyName, day, actionsLeft, metrics, employees, tasks, defects, pendingEvent, dailyReports, completedMissionIds, openDesktop, performAction, resolveEvent, endDay, discoverTrait, coffeeBrewsToday = 0, mealsOrderedToday = [], brewCoffee } = useGameStore();
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [dialogueText, setDialogueText] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [amenityFeedback, setAmenityFeedback] = useState<string | null>(null);
   const opener = dailyOpeners[day] ?? dailyOpeners[7];
   const selectedEmployee = employees.find((employee) => employee.id === selectedEmpId);
   const report = showReport ? dailyReports[dailyReports.length - 1] : null;
@@ -113,6 +114,13 @@ export default function OfficeHub() {
   const progress = Math.round(metrics.progress);
   const dayMissions = missionsForDay(day);
   const missionsComplete = dayMissions.every((mission) => completedMissionIds.includes(mission.id));
+
+  const quickBrew = (kind: 'chai' | 'filter' | 'espresso') => {
+    sound.playCoffee();
+    const res = brewCoffee(kind);
+    setAmenityFeedback(res.success ? `${res.message} ${res.quote}` : res.message);
+    setTimeout(() => setAmenityFeedback(null), 5500);
+  };
 
   const teammateLine = (employee: Employee) => characterDialogue[employee.id]?.line(employee, day) ?? '“I am here. I have no idea why.”';
 
@@ -174,6 +182,83 @@ export default function OfficeHub() {
 
         <MissionControl day={day} />
 
+        {/* Office Amenities & Break Lounge Bar */}
+        <section className="game-amenities-bar">
+          <div className="amenity-station chai-coffee-station">
+            <div className="amenity-station-header">
+              <span className="amenity-icon"><Coffee size={15} /></span>
+              <div>
+                <b>TAPRI CHAI & COFFEE BAR</b>
+                <small>Brews: {coffeeBrewsToday}/3 today</small>
+              </div>
+            </div>
+            <div className="amenity-quick-actions">
+              <button onClick={() => quickBrew('chai')} disabled={coffeeBrewsToday >= 3} title="Adrak cutting chai (Free, Morale +5%, Fatigue -8%)">
+                🍵 Chai (Free)
+              </button>
+              <button onClick={() => quickBrew('filter')} disabled={coffeeBrewsToday >= 3 || metrics.cash < 40} title="South Indian Filter Kaapi (₹40, Morale +8%, Fatigue -12%)">
+                ☕ Filter (₹40)
+              </button>
+              <button className="amenity-btn-alert" onClick={() => quickBrew('espresso')} disabled={coffeeBrewsToday >= 3 || metrics.cash < 100} title="Emergency Nitro Espresso (₹100, Morale +10%, Fatigue -22%)">
+                ⚡ Nitro (₹100)
+              </button>
+            </div>
+          </div>
+
+          <div className="amenity-station food-delivery-station">
+            <div className="amenity-station-header">
+              <span className="amenity-icon"><UtensilsCrossed size={15} /></span>
+              <div>
+                <b>PANICEATS FOOD DELIVERY</b>
+                <small>{mealsOrderedToday.length} meals ordered today</small>
+              </div>
+            </div>
+            <div className="amenity-quick-actions">
+              <button onClick={() => openDesktop('pantry')} className="amenity-btn-food">
+                🍱 Order Lunch / Dinner <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+
+          <div className="amenity-station reels-station">
+            <div className="amenity-station-header">
+              <span className="amenity-icon reels-flame"><Flame size={15} /></span>
+              <div>
+                <b>OFFICEGRAM REELS</b>
+                <small>Doomscroll & Coworker Roasts</small>
+              </div>
+            </div>
+            <div className="amenity-quick-actions">
+              <button onClick={() => openDesktop('reels')} className="amenity-btn-reels">
+                📱 Watch Reels <Sparkles size={13} />
+              </button>
+            </div>
+          </div>
+
+          <div className="amenity-station gossip-station">
+            <div className="amenity-station-header">
+              <span className="amenity-icon"><MessageSquareText size={15} /></span>
+              <div>
+                <b>WATERCOOLER</b>
+                <small>Overheard office banter</small>
+              </div>
+            </div>
+            <div className="amenity-quick-actions">
+              <button onClick={() => openDesktop('pantry')} className="amenity-btn-watercooler">
+                💬 Eavesdrop <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {amenityFeedback && (
+          <div className="game-amenity-feedback-toast">
+            <CheckCircle2 size={16} />
+            <span>{amenityFeedback}</span>
+            <button onClick={() => setAmenityFeedback(null)}>✕</button>
+          </div>
+        )}
+
         <div className="game-office-floor">
           <div className="game-office-window"><span>THE {companyName.toUpperCase()} FLOOR</span><b>CLICK A TEAMMATE TO INTERACT</b></div>
           <div className="game-employee-lineup">
@@ -190,7 +275,7 @@ export default function OfficeHub() {
               return <motion.button key={employee.id} className={`game-employee-card ${offline ? 'employee-offline' : ''}`} onClick={() => interact(employee.id)} whileHover={{ y: -9, rotate: employee.id === 'nikhil' ? -1 : 1 }} whileTap={{ scale: .97 }}>
                 <div className="game-employee-status">{offline ? 'LAST SEEN: ???' : employee.availability === 'busy' ? 'BUSY' : 'IN OFFICE'}</div>
                 <div className="game-employee-art"><CharacterSprite character={employee.id as CharacterId} expression={offline ? 'exhausted' : state?.expression ?? 'neutral'} size="lg" speaking={!offline} /></div>
-                <div className="game-employee-info"><h3>{employee.name}</h3><span>{employee.title}</span><p>{employee.tagline}</p></div>
+                <div className="game-employee-info"><h3>{employee.name} ({employee.role})</h3><span>{employee.title}</span><p>{employee.tagline}</p></div>
                 <div className="game-employee-task">{activeTask ? `WORKING: ${activeTask.title}` : offline ? 'NO SIGNAL. NO SHAME.' : 'WAITING FOR INSTRUCTIONS'}</div>
                 <div className="game-employee-hover">TALK TO {employee.name.toUpperCase()} <ArrowRight size={14} /></div>
               </motion.button>;
@@ -221,7 +306,7 @@ export default function OfficeHub() {
             <motion.div className="game-character-dialogue" initial={{ opacity: 0, y: 22, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14 }} onClick={(event) => event.stopPropagation()}>
               <button className="game-modal-close" onClick={() => setSelectedEmpId(null)}><X size={19} /></button>
               <div className="game-dialogue-character"><CharacterSprite character={selectedEmployee.id as CharacterId} size="xl" expression={characterDialogue[selectedEmployee.id]?.expression ?? 'neutral'} speaking /></div>
-              <div className="game-dialogue-body"><span className="game-scene-kicker">TEAM INTERACTION · {selectedEmployee.role}</span><h2>{selectedEmployee.name}</h2><div className="game-big-quote">{teammateLine(selectedEmployee)}</div><p className="game-character-hint">{characterDialogue[selectedEmployee.id]?.hint}</p>
+              <div className="game-dialogue-body"><span className="game-scene-kicker">TEAM INTERACTION · {selectedEmployee.role}</span><h2>{selectedEmployee.name} ({selectedEmployee.role})</h2><div className="game-big-quote">{teammateLine(selectedEmployee)}</div><p className="game-character-hint">{characterDialogue[selectedEmployee.id]?.hint}</p>
                 {dialogueText && <div className="game-action-feedback"><CheckCircle2 size={17} /> {dialogueText}</div>}
                 <div className="game-founder-actions"><span>FOUNDER ACTIONS · {actionsLeft} LEFT TODAY</span><div>
                   <button onClick={() => act('motivate')} disabled={actionsLeft <= 0}><span>🎤</span><b>Motivate</b><small>Boost morale</small></button>

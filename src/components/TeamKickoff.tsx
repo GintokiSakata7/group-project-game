@@ -13,24 +13,38 @@ const workstreams = [
   { id: 'backend', title: 'Backend & Deployment', detail: 'Enquiry flow, API and production release.', icon: ClipboardCheck },
 ];
 
+const roleMap: Record<string, string> = {
+  kunal: 'Client Relations',
+  aarav: 'Frontend Developer',
+  varun: 'Technical Lead',
+  meera: 'Quality Assurance',
+  nikhil: 'Backend Developer',
+};
+
 const team = [
   {
     id: 'kunal',
     name: 'Kunal',
-    title: 'Client Relations ("Chief Motivation Officer")',
+    title: '"Chief Motivation Officer"',
     prompt: 'Can you own client communication and content without promising a lifetime supply of features?',
     banter: {
-      communication: '“Leave Prakash Uncle to me! I speak fluent catering! While I keep the client fed with optimism, Aarav better make the buttons work!”',
-      frontend: '“Wait, I’m building CSS?! Guys, my CSS has only two rules: font-size: 80px and background: rainbow. Meera, prepare the tissues.”',
-      technical: '“I will align our holistic energy grid with the client’s chakra. That’s technical direction, right?”',
-      quality: '“QA? Everything passes with a high five! Who needs test cases when you have unconditional love?”',
-      backend: '“I will personally whisper to the server. If the database crashes, I’ll play a motivational harp.”',
+      communication: '“Leave Prakash Uncle to me! I speak fluent catering and wedding diplomacy! While I keep the client calm and well-fed with optimism, Aarav better make the buttons work and Varun please keep the diagrams under 10 slides!”',
+      frontend: '“Wait, ME on CSS?! Team, my CSS has only two rules: font-size: 80px and background: rainbow sparkle! Meera, prepare an emotional support kit for code review!”',
+      technical: '“Technical architecture?! I will harmonize our cloud microservices with the client’s spiritual aura! Varun is already crying into his coffee!”',
+      quality: '“QA?! Every test passes with a warm high five! A bug is just an undocumented feature waiting for love! Meera is going to murder me.”',
+      backend: '“Backend?! I will personally whisper sweet affirmations into PostgreSQL. If the server drops packets, I’ll play motivational flute music until the tables recover.”',
+    },
+    squadTakes: {
+      aarav: '“Aarav’s vibing with 14 CSS animations at 120 FPS, but clicking ‘Order’ currently does window.alert(‘spiritual placeholder’). Don’t worry bro, I will tell the client it’s Zen minimalism!”',
+      varun: '“Varun has drawn a 47-slide Miro architecture diagram for a contact form with 3 input boxes. Even NASA doesn’t plan this much! Varun, can we eat the diagrams?”',
+      meera: '“Meera is staring at the screen like it personally insulted her ancestors. She already logged 19 blockers on our blank repo. Truly terrifying and deeply necessary!”',
+      nikhil: '“Nikhil just sent a thumbs-up emoji from an active railway tunnel. That is the longest emotional speech he has given all month! We are blessed!”',
     },
   },
   {
     id: 'aarav',
     name: 'Aarav',
-    title: 'Full-Stack Vibe Coder',
+    title: '"Full-Stack Vibe Coder"',
     prompt: 'Which part of the build are you willing to make work outside the AI preview?',
     banter: {
       frontend: '“Frontend is locked. 14 CSS animations already running at 120 FPS. If Varun gives me a 40-page PDF instead of an API, I am deploying directly to main bro.”',
@@ -43,7 +57,7 @@ const team = [
   {
     id: 'varun',
     name: 'Varun',
-    title: 'Technical Lead',
+    title: '"Technical Lead & Diagram Architect"',
     prompt: 'Pick a workstream where you can show evidence, not just diagrams.',
     banter: {
       technical: '“I have designed a 7-tier architectural roadmap for this single-page catering site. Notice how the event loop harmonizes with the biryani catalogue.”',
@@ -56,7 +70,7 @@ const team = [
   {
     id: 'meera',
     name: 'Meera',
-    title: 'Quality Assurance',
+    title: '"QA & Defect Hunter"',
     prompt: 'You own quality. Please rank blockers before testing the shadows.',
     banter: {
       quality: '“I am ready. I inspected the staging preview. Clicking WhatsApp currently alerts ‘window.openWhatsAppEnquiry is a spiritual placeholder’. Nobody is going home until this is fixed.”',
@@ -69,7 +83,7 @@ const team = [
   {
     id: 'nikhil',
     name: 'Nikhil',
-    title: 'Backend Developer',
+    title: '"Senior Backend & Stealth Committer"',
     prompt: 'A specific backend deliverable. A specific handoff. A specific day, please.',
     banter: {
       backend: '“...western line flyover signal restored. backend API endpoints will exist. do not talk to me between 9 AM and 4 PM.”',
@@ -144,7 +158,7 @@ export default function TeamKickoff() {
             <div className="kickoff-banter-speaker">
               <CharacterSprite character={activePerson.id as CharacterId} size="sm" expression="talking" />
               <div>
-                <strong>{activePerson.name} · {activePerson.title}</strong>
+                <strong>{activePerson.name} ({roleMap[activePerson.id] || activePerson.title})</strong>
                 <small>Reacting to role assignment</small>
               </div>
             </div>
@@ -184,7 +198,7 @@ export default function TeamKickoff() {
                 </div>
                 <div className="kickoff-member-info">
                   <span className="kickoff-member-index">TEAM MEMBER 0{index + 1}</span>
-                  <h2>{person.name}</h2>
+                  <h2>{person.name} ({roleMap[person.id] || person.title})</h2>
                   <b>{person.title}</b>
                   <p>{person.prompt}</p>
                 </div>

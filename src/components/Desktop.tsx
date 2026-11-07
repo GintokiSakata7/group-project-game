@@ -20,9 +20,12 @@ import FilesApp from '../apps/FilesApp';
 import TerminalApp from '../apps/TerminalApp';
 import WebPreview from '../apps/WebPreview';
 import MusicApp from '../apps/MusicApp';
+import BreakRoomApp from '../apps/BreakRoomApp';
+import ReelsApp from '../apps/ReelsApp';
 import { Pill } from '../apps/shared';
 import { missionsForDay } from '../game/missions';
 import { sound } from '../game/audio';
+import { Coffee, Flame } from 'lucide-react';
 
 interface WindowState {
   id: AppId;
@@ -43,6 +46,8 @@ const appMeta: Record<AppId, { title: string; subtitle: string; icon: ReactNode;
   people: { title: 'Team Room', subtitle: 'Profiles, traits & dynamics', icon: <Users />, color: 'coral', hint: 'Manage the humans' },
   sprint: { title: 'Task Board', subtitle: 'Assignments & progress', icon: <CalendarClock />, color: 'orange', hint: 'Make work visible' },
   qa: { title: 'Build Lab', subtitle: 'Defects & test runs', icon: <ShieldCheck />, color: 'green', hint: 'Meera has notes' },
+  pantry: { title: 'Break Lounge', subtitle: 'Chai, Coffee & PanicEats', icon: <Coffee />, color: 'gold', hint: 'Fuel the team to beat crunch' },
+  reels: { title: 'OfficeGram', subtitle: 'Dev Reels & Doomscrolling', icon: <Flame />, color: 'pink', hint: '5-minute brainrot break' },
   music: { title: 'PanicBeats', subtitle: 'Kunal’s Lo-Fi Jukebox', icon: <Sparkles />, color: 'gold', hint: 'Music to code and cry to' },
   hq: { title: 'Founder Dashboard', subtitle: 'Command centre & KPIs', icon: <LayoutDashboard />, color: 'slate', hint: 'The project at a glance' },
   finance: { title: 'Finance', subtitle: 'Company ledger', icon: <Wallet />, color: 'gold', hint: 'Numbers do not lie' },
@@ -50,18 +55,19 @@ const appMeta: Record<AppId, { title: string; subtitle: string; icon: ReactNode;
   terminal: { title: 'Build Monitor', subtitle: 'Logs & system status', icon: <Terminal />, color: 'dark', hint: 'It failed for a reason' },
 };
 
-// 7 Primary Adventure Apps + Secondary Utilities
-const primaryApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'music'];
-const allApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'music', 'hq', 'finance', 'files', 'terminal'];
+// Adventure & Corporate Apps
+const primaryApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'pantry', 'reels', 'music'];
+const allApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'pantry', 'reels', 'music', 'hq', 'finance', 'files', 'terminal'];
 
 const defaultWindow = (id: AppId, count: number): WindowState => {
   const isWide = typeof window !== 'undefined' ? window.innerWidth > 1024 : true;
-  const defWidth = isWide ? 980 : Math.min(860, typeof window !== 'undefined' ? window.innerWidth - 30 : 860);
-  const defHeight = isWide ? 640 : 580;
+  const isReels = id === 'reels';
+  const defWidth = isReels ? 450 : isWide ? 980 : Math.min(860, typeof window !== 'undefined' ? window.innerWidth - 30 : 860);
+  const defHeight = isReels ? 720 : isWide ? 640 : 580;
 
   return {
     id,
-    x: Math.max(16, 50 + (count % 4) * 36),
+    x: isReels ? Math.max(20, Math.floor((typeof window !== 'undefined' ? window.innerWidth - 470 : 800) / 2)) : Math.max(16, 50 + (count % 4) * 36),
     y: Math.max(48, 44 + (count % 4) * 26),
     width: defWidth,
     height: defHeight,
@@ -81,6 +87,8 @@ function AppContent({ id, openApp }: { id: AppId; openApp: (app: AppId) => void 
     case 'people': return <PeopleApp />;
     case 'sprint': return <SprintBoard />;
     case 'qa': return <QALab />;
+    case 'pantry': return <BreakRoomApp />;
+    case 'reels': return <ReelsApp />;
     case 'hq': return <ProjectHQ openApp={openApp} />;
     case 'finance': return <FinanceApp />;
     case 'files': return <FilesApp />;
@@ -599,23 +607,25 @@ export default function Desktop() {
             {notifications.length === 0 ? (
               <p>No new notifications. Suspiciously quiet.</p>
             ) : (
-              notifications.slice(0, 10).map((item) => (
-                <button
-                  className="notification-item"
-                  key={item.id}
-                  onClick={() => {
-                    openApp(item.app);
-                    setShowNotifications(false);
-                  }}
-                >
-                  <span className={`notification-tone ${item.tone}`} />
-                  <span>
-                    <strong>{item.title}</strong>
-                    <small>{item.body}</small>
-                    <em>Day {item.day}</em>
-                  </span>
-                </button>
-              ))
+              <div className="notification-centre-list">
+                {notifications.slice(0, 10).map((item) => (
+                  <button
+                    className="notification-item"
+                    key={item.id}
+                    onClick={() => {
+                      openApp(item.app);
+                      setShowNotifications(false);
+                    }}
+                  >
+                    <span className={`notification-tone ${item.tone}`} />
+                    <span>
+                      <strong>{item.title}</strong>
+                      <small>{item.body}</small>
+                      <em>Day {item.day}</em>
+                    </span>
+                  </button>
+                ))}
+              </div>
             )}
           </motion.aside>
         )}
