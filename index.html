@@ -9,7 +9,35 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; color: #fff; font-family: Inter, system-ui, sans-serif; padding: 20px; text-align: center;">
+        <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(140deg, #ffe58b, #ff5d91); display: grid; place-items: center; color: #160f22; font-size: 28px; font-weight: 1000; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(255, 71, 126, 0.35);">M</div>
+        <h2 style="margin: 0 0 8px; font-size: 24px; font-weight: 900; letter-spacing: 0.05em;">MAJIN STUDIOS</h2>
+        <p style="margin: 0 0 20px; color: #94a3b8; font-size: 15px;">Loading The Group Project...</p>
+        <button id="boot-reset-btn" onclick="try{localStorage.clear();sessionStorage.clear();}catch(e){}location.reload();" style="display: none; padding: 12px 20px; border-radius: 12px; background: #ff5c91; color: #fff; border: none; font-weight: 800; cursor: pointer; font-size: 14px;">RESET DATA & RELOAD</button>
+        <div id="boot-error-msg" style="display: none; margin-top: 16px; max-width: 500px; padding: 12px; background: rgba(255, 71, 126, 0.15); border: 1px solid rgba(255, 71, 126, 0.4); border-radius: 10px; color: #ff85a8; font-size: 12px; font-family: monospace; text-align: left; word-break: break-all;"></div>
+      </div>
+    </div>
+    <script>
+      window.addEventListener('error', function(ev) {
+        var btn = document.getElementById('boot-reset-btn');
+        var err = document.getElementById('boot-error-msg');
+        if (btn) btn.style.display = 'inline-block';
+        if (err && ev.error) {
+          err.style.display = 'block';
+          err.textContent = (ev.error && (ev.error.stack || ev.error.message)) || ev.message;
+        }
+      });
+      window.addEventListener('unhandledrejection', function(ev) {
+        var btn = document.getElementById('boot-reset-btn');
+        var err = document.getElementById('boot-error-msg');
+        if (btn) btn.style.display = 'inline-block';
+        if (err && ev.reason) {
+          err.style.display = 'block';
+          err.textContent = (ev.reason && (ev.reason.stack || ev.reason.message)) || String(ev.reason);
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

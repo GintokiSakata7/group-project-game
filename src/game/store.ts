@@ -65,27 +65,44 @@ const initialState = (): GameState => ({
 
 const endingFor = (kind: Ending['kind'], title: string, subtitle: string, body: string, score?: number): Ending => ({ kind, title, subtitle, body, score });
 
-const memoryStorage = (() => {
-  const store = new Map<string, string>();
+const safeStorage = (() => {
+  const memoryStore = new Map<string, string>();
   return {
-    getItem: (key: string): string | null => store.get(key) ?? null,
+    getItem: (key: string): string | null => {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const val = window.localStorage.getItem(key);
+          if (val !== null) return val;
+        }
+      } catch (e) {
+        console.warn('localStorage.getItem unavailable, using memory store', e);
+      }
+      return memoryStore.get(key) ?? null;
+    },
     setItem: (key: string, value: string): void => {
-      store.set(key, value);
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, value);
+          return;
+        }
+      } catch (e) {
+        console.warn('localStorage.setItem unavailable, using memory store', e);
+      }
+      memoryStore.set(key, value);
     },
     removeItem: (key: string): void => {
-      store.delete(key);
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.removeItem(key);
+          return;
+        }
+      } catch (e) {
+        console.warn('localStorage.removeItem unavailable, using memory store', e);
+      }
+      memoryStore.delete(key);
     },
   };
 })();
-
-const getStorage = () => {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      return window.localStorage;
-    }
-  } catch {}
-  return memoryStorage;
-};
 
 export const useGameStore = create<GameStore>()(persist((set, get) => ({
   ...initialState(),
@@ -762,7 +779,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       actionsLeft: Number.isFinite(persistedState?.actionsLeft) ? persistedState.actionsLeft : fresh.actionsLeft,
     };
   },
-  storage: createJSONStorage(getStorage),
+  storage: createJSONStorage(() => safeStorage),
   partialize: (state: GameStore) => ({
     phase: state.phase,
     companyName: state.companyName,
@@ -795,3 +812,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
 export const getEmployee = (id: string) => useGameStore.getState().employees.find((employee) => employee.id === id);
 export const getTask = (id: string) => useGameStore.getState().tasks.find((task) => task.id === id);
+
+if (typeof window !== 'undefined') {
+  (window as any).__store = useGameStore;
+}
