@@ -464,12 +464,12 @@ export default function ClientMeeting() {
           </div>
 
           {/* Client Speech Bubble */}
-          <div className="client-speech-bubble">
-            <p className="speech-text">{stage.clientSpeech}</p>
+          <div className="client-speech-bubble" style={{ background: '#ffffff', color: '#160f22' }}>
+            <p className="speech-text" style={{ color: '#160f22' }}>{stage.clientSpeech}</p>
             {stage.buntyInterjection && (
-              <div className="bunty-whisper">
-                <strong>BUNTY CHIMES IN:</strong>
-                <p>{stage.buntyInterjection}</p>
+              <div className="bunty-whisper" style={{ background: '#fff4d6', color: '#583710' }}>
+                <strong style={{ color: '#78350f' }}>BUNTY CHIMES IN:</strong>
+                <p style={{ color: '#451a03' }}>{stage.buntyInterjection}</p>
               </div>
             )}
           </div>

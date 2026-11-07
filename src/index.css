@@ -810,37 +810,47 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 
 .client-speech-bubble {
   padding: 24px 28px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  color: #160f22;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
 }
 
-.speech-text {
+.speech-text,
+.client-speech-bubble .speech-text {
   margin: 0;
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1.55;
-  color: #f8fafc;
+  color: #160f22 !important;
+  font-weight: 750;
 }
 
 .bunty-whisper {
   margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-  color: #a5b4fc;
+  padding: 12px 16px;
+  background: #fff4d6;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+  color: #583710 !important;
 }
 
 .bunty-whisper strong {
-  font-size: 12px;
-  letter-spacing: .1em;
+  font-size: 11px;
+  letter-spacing: .12em;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  font-weight: 900;
+  color: #78350f !important;
 }
 
 .bunty-whisper p {
   margin: 0;
   font-size: 15px;
+  line-height: 1.45;
   font-style: italic;
+  font-weight: 600;
+  color: #451a03 !important;
 }
 
 .client-reaction-panel {
@@ -4278,8 +4288,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .bunty-floating-card { margin-top:15px; padding:11px 14px; background:#ffffff0c; border:1px solid #ffffff19; border-radius:16px; color:#fff; }
 .bunty-floating-card .character-sprite { width:64px!important; height:64px!important; }.bunty-info strong { font-size:14px; }.bunty-info small { display:block; font-size:12px; color:#b7a8c7; }
 .stage-step-tag { margin-bottom:13px; }.stage-step-tag span { color:#ffd67b; font-size:11px; font-weight:1000; letter-spacing:.15em; }.stage-step-tag h3 { color:#fff; font-size:clamp(22px,2.3vw,30px); margin:5px 0 0; letter-spacing:-.04em; }
-.client-speech-bubble { padding:20px 22px; background:#fff; color:#241a2d; border-radius:18px; box-shadow:0 14px 35px #0003; }.client-speech-bubble .speech-text { font-size:19px; line-height:1.55; font-weight:700; }
-.bunty-whisper { margin-top:14px; padding:12px 14px; background:#fff2d1; border-radius:11px; color:#66451e; }.bunty-whisper strong { font-size:11px; letter-spacing:.1em; }.bunty-whisper p { font-size:15px; margin:4px 0 0; }
+.client-speech-bubble { padding:20px 22px; background:#fff; color:#160f22; border-radius:18px; box-shadow:0 14px 35px #0003; }
+.client-speech-bubble .speech-text { font-size:19px; line-height:1.55; font-weight:750; color:#160f22 !important; }
+.bunty-whisper { margin-top:14px; padding:12px 14px; background:#fff2d1; border-radius:11px; color:#583710 !important; }
+.bunty-whisper strong { font-size:11px; letter-spacing:.1em; color:#78350f !important; }
+.bunty-whisper p { font-size:15px; margin:4px 0 0; color:#451a03 !important; }
 .client-reaction-panel { margin-top:12px; padding:14px 17px; border:1px solid #ffcb7a44; background:#5a3a2544; border-radius:14px; color:#ffe1b2; }.reaction-speaker strong { font-size:11px; letter-spacing:.11em; }.reaction-body { margin:5px 0; font-size:16px; font-weight:750; }.bunty-reaction-body { font-size:14px; margin:5px 0 0; color:#d8c6aa; }
 .decision-options-list { margin-top:18px; gap:10px; }.options-header-label { color:#b8abc8; font-size:11px; font-weight:1000; letter-spacing:.13em; }
 .decision-option-btn { padding:15px 17px; border:1px solid #ffffff24; border-radius:14px; background:#ffffff0b; color:#fff; text-align:left; gap:13px; }.decision-option-btn:hover,.decision-option-btn.selected { border-color:#ff6b9c; background:#ff4b881c; transform:translateX(3px); }
@@ -4336,7 +4349,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .story-screen { min-height:100dvh; height:auto; overflow-y:auto; padding:14px; }.story-topbar { align-items:flex-start; }.story-progress-wrap { grid-template-columns:1fr auto; gap:7px; }.story-progress-wrap > span { display:none; }.story-progress { grid-row:2; grid-column:1; width:140px; }.story-progress-wrap b { grid-column:2; grid-row:2; }.story-stage-wrap { display:block; padding:16px 0; }.story-footer { font-size:8px; gap:10px; }.story-footer span:last-child { display:none; }
   .foundation-grid,.hire-scene-grid { grid-template-columns:1fr; }.foundation-art { min-height:230px; }.foundation-neon { font-size:42px; }.foundation-desk { transform:scale(.75); transform-origin:bottom center; }.foundation-copy h1 { font-size:40px; }.foundation-copy p { font-size:16px; }.hire-character-stage { min-height:280px; }.hire-character-stage .character-sprite { width:190px!important; height:190px!important; }.hire-dialogue-panel { padding:0; }.hire-speech { font-size:19px; padding:17px; }.hire-character-name h2 { font-size:25px; }.hire-scene { padding:16px; }.hire-scene-top { align-items:flex-start; gap:8px; }.hire-count { font-size:9px; }
   .incoming-call-scene { min-height:unset; }.call-phone-card { padding:24px 18px; }.call-phone-card .character-sprite { width:190px!important; height:190px!important; }.call-side-note { display:none; }.call-ringing-lines { width:90vw; height:90vw; }
-  .client-meeting-screen { height:auto; min-height:100dvh; padding:14px; }.client-meeting-header { align-items:flex-start; gap:8px; }.client-meeting-stage { grid-template-columns:1fr; }.client-portrait-col { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }.client-card-frame { padding:10px; display:flex; align-items:center; gap:12px; text-align:left; }.client-card-frame .character-sprite { width:104px!important; height:104px!important; }.client-title-card h3 { font-size:19px; }.bunty-floating-card { margin:0; }.bunty-floating-card .character-sprite { width:44px!important; height:44px!important; }.bunty-info small { max-width:100px; }.client-speech-bubble .speech-text { font-size:16px; }.option-texts strong { font-size:14px; }.option-texts small { font-size:12px; }.decision-option-btn { padding:12px; }.incoming-call-fullscreen { padding:22px 16px; margin:0; }.incoming-call-fullscreen h1 { font-size:29px; }
+  .client-meeting-screen { height:auto; min-height:100dvh; padding:14px; }.client-meeting-header { align-items:flex-start; gap:8px; }.client-meeting-stage { grid-template-columns:1fr; }.client-portrait-col { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }.client-card-frame { padding:10px; display:flex; align-items:center; gap:12px; text-align:left; }.client-card-frame .character-sprite { width:104px!important; height:104px!important; }.client-title-card h3 { font-size:19px; }.bunty-floating-card { margin:0; }.bunty-floating-card .character-sprite { width:44px!important; height:44px!important; }.bunty-info small { max-width:100px; }.client-speech-bubble .speech-text { font-size:16px; color:#160f22 !important; }.option-texts strong { font-size:14px; }.option-texts small { font-size:12px; }.decision-option-btn { padding:12px; }.incoming-call-fullscreen { padding:22px 16px; margin:0; }.incoming-call-fullscreen h1 { font-size:29px; }
   .contract-party-screen { height:auto; min-height:100dvh; padding:14px; }.contract-party-card { padding:20px; }.contract-party-hero { grid-template-columns:1fr 110px; gap:8px; }.contract-party-hero .character-sprite { width:110px!important; height:110px!important; }.contract-party-hero h1 { font-size:40px; }.contract-party-hero p { font-size:14px; }.contract-party-terms { grid-template-columns:1fr; }.contract-party-quote { align-items:flex-start; flex-wrap:wrap; }.contract-party-quote p { font-size:13px; }
   .game-office-screen { height:auto; min-height:100dvh; overflow-y:auto; }.game-office-topbar { flex-wrap:wrap; min-height:unset; padding:12px; }.game-office-brand { min-width:unset; }.game-day-banner { order:3; width:100%; justify-content:center; }.game-office-right { margin-left:auto; }.game-mini-stat:first-child { display:none; }.game-office-main { overflow:visible; padding:15px 12px; }.game-office-intro h1 { font-size:25px; }.game-office-intro p { font-size:14px; }.game-mission-pill { flex-wrap:wrap; }.game-office-floor { padding:10px; }.game-employee-lineup { grid-template-columns:repeat(2,minmax(0,1fr)); }.game-employee-card:last-child { grid-column:1/-1; max-width:calc(50% - 4px); justify-self:center; width:100%; }.game-employee-art { height:100px; }.game-employee-art .character-sprite { width:100px!important; height:100px!important; }.game-office-bottom { grid-template-columns:1fr; gap:11px; }.game-office-actions { display:grid; grid-template-columns:1fr 1fr; }.game-character-dialogue { grid-template-columns:1fr; gap:12px; padding:17px; max-height:92dvh; overflow-y:auto; }.game-dialogue-character { min-height:140px; }.game-dialogue-character .character-sprite { width:140px!important; height:140px!important; }.game-dialogue-body h2 { font-size:27px; }.game-big-quote { font-size:17px; }.game-founder-actions > div { grid-template-columns:repeat(2,1fr); }.game-event-card,.game-report-card { padding:18px; max-height:92dvh; overflow:auto; }.game-event-person .character-sprite { width:86px!important; height:86px!important; }.game-event-person h2,.game-report-card h2 { font-size:22px; }.game-event-body,.game-report-card > p { font-size:15px; }.game-report-columns { grid-template-columns:1fr; }.game-report-stats { flex-wrap:wrap; }
   .new-game-over-card { padding:23px; }.new-game-over-cast .character-sprite { width:78px!important; height:78px!important; }
