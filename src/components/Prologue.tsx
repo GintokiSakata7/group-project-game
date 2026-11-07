@@ -67,12 +67,28 @@ export default function Prologue() {
   const hiredCount = Math.max(0, Math.min(hires.length, step - 2));
   const progress = Math.round((step / (totalSteps - 1)) * 100);
 
+  const scrollStageTop = () => {
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelector('.story-screen')?.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  };
+
+  const chooseHuddle = (choice: string) => {
+    setHuddleChoice(choice);
+    setTimeout(() => {
+      const el = document.querySelector('.huddle-response');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  };
+
   const next = () => {
     if (isFoundation) {
       const clean = companyName.trim().slice(0, 24) || 'PANIC LABS';
       useGameStore.setState({ companyName: clean });
       setCompanyName(clean);
       setStep(1);
+      scrollStageTop();
       return;
     }
     if (isHuddle) {
@@ -81,6 +97,7 @@ export default function Prologue() {
       return;
     }
     setStep((current) => current + 1);
+    scrollStageTop();
   };
 
   return (
@@ -121,9 +138,9 @@ export default function Prologue() {
               </div>
               <div className="huddle-dialogue"><span className="story-eyebrow">THE FIRST TEAM HUDDLE</span>
                 {!huddleChoice ? <><h2>How do you want to prepare the team?</h2><div className="huddle-options">
-                  <button onClick={() => setHuddleChoice('honest')}><b>01 · Set the ground rules</b><span>“We listen first. We promise only what we can deliver.”</span></button>
-                  <button onClick={() => setHuddleChoice('strengths')}><b>02 · Let everyone state their strengths</b><span>“Tell me what you can genuinely own. No job titles from LinkedIn.”</span></button>
-                  <button onClick={() => setHuddleChoice('hype')}><b>03 · Let Kunal lead the pep talk</b><span>“Kunal, you have 30 seconds. No slides.”</span></button>
+                  <button onClick={() => chooseHuddle('honest')}><b>01 · Set the ground rules</b><span>“We listen first. We promise only what we can deliver.”</span></button>
+                  <button onClick={() => chooseHuddle('strengths')}><b>02 · Let everyone state their strengths</b><span>“Tell me what you can genuinely own. No job titles from LinkedIn.”</span></button>
+                  <button onClick={() => chooseHuddle('hype')}><b>03 · Let Kunal lead the pep talk</b><span>“Kunal, you have 30 seconds. No slides.”</span></button>
                 </div></> : <><div className="huddle-response">{huddleChoice === 'honest' ? 'You set one rule: no promises without evidence. Meera nods. Varun opens a slide titled “Evidence Framework”. You close it.' : huddleChoice === 'strengths' ? 'Aarav says he can build anything with AI. Varun says architecture is his strength. Meera asks for proof. Nikhil sends a thumbs-up from an unknown location. Kunal volunteers to “own vibes”.' : 'Kunal stands up. “TEAM! We are not a startup. We are a startup of the mind.” Aarav starts clapping. Meera checks whether clapping has acceptance criteria.'}</div><div className="huddle-reactions"><span>VARUN: “I am aligned.”</span><span>MEERA: “Define aligned.”</span><span>KUNAL: “This is already historic.”</span></div><button className="story-primary-button" onClick={next}>THE CLIENT IS CALLING <PhoneCall size={18} /></button></>}
               </div>
             </motion.div>

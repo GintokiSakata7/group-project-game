@@ -721,16 +721,45 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
   version: 3,
   migrate: (persistedState: any) => {
     const fresh = initialState();
+    if (!persistedState || typeof persistedState !== 'object') {
+      return fresh;
+    }
     return {
       ...fresh,
       ...persistedState,
-      employees: Array.isArray(persistedState?.employees)
-        ? persistedState.employees.map((employee: any) => ({ ...employee, founderTrust: Number.isFinite(employee.founderTrust) ? employee.founderTrust : 50 }))
+      metrics: {
+        ...fresh.metrics,
+        ...(persistedState?.metrics || {}),
+      },
+      employees: Array.isArray(persistedState?.employees) && persistedState.employees.length > 0
+        ? persistedState.employees.map((employee: any, index: number) => ({
+            ...(fresh.employees[index] || {}),
+            ...employee,
+            founderTrust: Number.isFinite(employee?.founderTrust) ? employee.founderTrust : 50,
+          }))
         : fresh.employees,
-      relationships: Array.isArray(persistedState?.relationships) ? persistedState.relationships : fresh.relationships,
-      tasks: Array.isArray(persistedState?.tasks) ? persistedState.tasks : fresh.tasks,
+      relationships: Array.isArray(persistedState?.relationships) && persistedState.relationships.length > 0
+        ? persistedState.relationships
+        : fresh.relationships,
+      tasks: Array.isArray(persistedState?.tasks) && persistedState.tasks.length > 0
+        ? persistedState.tasks
+        : fresh.tasks,
+      channels: Array.isArray(persistedState?.channels) && persistedState.channels.length > 0
+        ? persistedState.channels
+        : fresh.channels,
+      messages: Array.isArray(persistedState?.messages) && persistedState.messages.length > 0
+        ? persistedState.messages
+        : fresh.messages,
+      commits: Array.isArray(persistedState?.commits) ? persistedState.commits : fresh.commits,
+      defects: Array.isArray(persistedState?.defects) && persistedState.defects.length > 0
+        ? persistedState.defects
+        : fresh.defects,
+      notifications: Array.isArray(persistedState?.notifications) ? persistedState.notifications : fresh.notifications,
+      dailyReports: Array.isArray(persistedState?.dailyReports) ? persistedState.dailyReports : fresh.dailyReports,
       completedMissionIds: Array.isArray(persistedState?.completedMissionIds) ? persistedState.completedMissionIds : fresh.completedMissionIds,
-      roleAssignments: persistedState?.roleAssignments && typeof persistedState.roleAssignments === 'object' ? persistedState.roleAssignments : fresh.roleAssignments,
+      roleAssignments: persistedState?.roleAssignments && typeof persistedState.roleAssignments === 'object' ? { ...fresh.roleAssignments, ...persistedState.roleAssignments } : fresh.roleAssignments,
+      scopeAccepted: Array.isArray(persistedState?.scopeAccepted) && persistedState.scopeAccepted.length > 0 ? persistedState.scopeAccepted : fresh.scopeAccepted,
+      actionsLeft: Number.isFinite(persistedState?.actionsLeft) ? persistedState.actionsLeft : fresh.actionsLeft,
     };
   },
   storage: createJSONStorage(getStorage),
