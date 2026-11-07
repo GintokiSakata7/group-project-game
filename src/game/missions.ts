@@ -62,16 +62,16 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'happy',
-        text: 'Good morning squad! Energy check! I set up our stand-up playlist: "Agile Beats to Code/Cry To Vol. 1". Today we manifest cross-functional synergy!',
+        text: 'Good morning legends! Energy check! I set up our stand-up playlist: "Agile Beats to Code/Cry To Vol. 1". Today we manifest cross-functional synergy and client peace!',
       },
       {
         speaker: 'aarav',
         name: 'Aarav',
         role: 'Full-Stack Vibe Coder',
         expression: 'smug',
-        text: 'Kunal, pause the Spotify. Big news guys—I basically finished the frontend. Full-stack vibe coding at 3 AM. 14 components, slick animations, pure poetry.',
+        text: 'Kunal, pause the Lo-Fi. Big news guys—I basically finished the frontend. Full-stack vibe coding at 3 AM. 14 components, slick animations, pure poetry.',
       },
       {
         speaker: 'meera',
@@ -118,9 +118,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Founder! The room is waiting for leadership! How are we steering this first stand-up?',
+        text: 'Hold on team! Let me summarize our progress: Aarav built 14 animated divs that do literally nothing, Varun drew a 47-slide Miro diagram for a 3-page website, Meera has already filed 18 Jira blockers, and Nikhil is transmitting code from an active train tunnel! As your Client Relations officer, I ask you: what on earth do I tell Mr. Prakash when he asks for the live link?! Founder, what is our stand-up directive?!',
       },
     ],
     choices: [
@@ -147,9 +147,9 @@ export const founderMissions: FounderMission[] = [
           {
             speaker: 'kunal',
             name: 'Kunal',
-            role: 'Chief Motivation Officer',
+            role: 'Client Relations ("Chief Motivation Officer")',
             expression: 'happy',
-            text: 'High-stakes energy! That\'s what I\'m talking about! Let\'s run the CLI!',
+            text: 'High-stakes live demo energy! That\'s what I\'m talking about! Let\'s see if Varun\'s localhost can survive a click!',
           },
         ],
         effects: { quality: 5, technicalDebt: -4, taskProgress: { architecture: 12 }, employeeMorale: { varun: -3, meera: 3 } },
@@ -178,9 +178,9 @@ export const founderMissions: FounderMission[] = [
           {
             speaker: 'kunal',
             name: 'Kunal',
-            role: 'Chief Motivation Officer',
+            role: 'Client Relations ("Chief Motivation Officer")',
             expression: 'happy',
-            text: 'Let him cook! I am cueing up ambient synth for Slide 12!',
+            text: 'Let him cook! I am cueing up ambient synth for Slide 12 while Aarav tweaks his gradients!',
           },
         ],
         effects: { morale: 3, technicalDebt: 8, taskProgress: { architecture: 5 }, employeeMorale: { varun: 5 } },
@@ -261,9 +261,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: 'Look at that rocket emoji though! Speed is currency in modern startups! Founder, what\'s the call on this PR?',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: 'Aarav, bhai, your PR diff is 2,400 lines of CSS animations and zero working forms! You added a rotating shahi paneer 3D model, but clicking "Submit Enquiry" literally executes window.alert("spiritual placeholder")! If Mr. Prakash sees this, he will deduct ₹2,000 from our advance! Founder, what\'s the call on this PR?',
       },
     ],
     choices: [
@@ -376,9 +376,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'I sent him three motivational GIFs and a voice note, but it only has one grey tick. Should I ping him on Instagram?',
+        text: 'Team, I sent Nikhil three motivational Spotify playlists and a voice note, but his WhatsApp has one single grey tick! Meanwhile, Aarav is sitting on his hands because the frontend has no API, Varun is writing poetry about event-driven architectures, and Mr. Prakash just texted asking if the WhatsApp button works on an iPad! Founder, should I try pinging Nikhil on LinkedIn or Instagram?!',
       },
       {
         speaker: 'meera',
@@ -512,9 +512,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: 'Wait, $BIRYANI coin sounds kinda fire though... could we do a community airdrop?',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: 'Wait, wait! Before Meera throws her laptop at Bunty: as Chief Motivation Officer, I must acknowledge the vision! But as Client Relations, look at our sprint reality: Aarav has 18 broken CSS divs on localhost, Varun is still diagramming the Kafka cluster, and Nikhil is somewhere in Thane on 2% battery! If we promise $BIRYANI coin today, Mr. Prakash will cancel the advance before dinner! Founder, how do we politely defuse Bunty\'s YouTube startup fever?!',
       },
       {
         speaker: 'meera',
@@ -791,9 +791,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: 'Both perspectives are so valid! What if we put an inspirational quote on the blank screen?',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: 'Team, team, breathe! Look at where we are: Meera has logged 42 defects, Aarav says the bugs are "spiritual aesthetic choices", Varun wants to write a 12-page memo justifying the blank screen, and Mr. Prakash is scheduled to click this website in 72 hours! If the client sees an error screen that says "woohoo", we are all drinking tap water next month! Founder, what is the QA triage strategy?!',
       },
       {
         speaker: 'meera',
@@ -906,9 +906,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: 'Fantastic! I have prepared a 34-slide deck with custom transition animations introducing the emotional brand arc of Royal Feast!',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: 'Wait, 65-inch TV?! On a live kitchen display?! Look at our progress status: Aarav only filled in 3 demo items—"Sample Samosa", "Test Biryani", and "Lorem Ipsum Naan"! If Mr. Prakash sees "Lorem Ipsum Naan" on a 65-inch screen in front of his kitchen halwais, my Chief Motivation career is over! Founder, what narrative do I present on this demo?!',
       },
       {
         speaker: 'meera',
@@ -990,7 +990,7 @@ export const founderMissions: FounderMission[] = [
           {
             speaker: 'kunal',
             name: 'Kunal',
-            role: 'Chief Motivation Officer',
+            role: 'Client Relations ("Chief Motivation Officer")',
             expression: 'happy',
             text: 'And with our revolutionary cloud-native Biryani Engine, you get unlimited AI menu translations and free lifetime maintenance!',
           },
@@ -1185,9 +1185,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: '3D kebabs would look insanely good on our agency portfolio though... what if we drink four energy drinks and pull an all-nighter?',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: '3D rotating kebabs?! Bunty, look at our sprint reality: we have 36 hours left, Nikhil just merged 400 lines of raw backend endpoints from an auto-rickshaw, Aarav is recovering from a CSS overdose, and Meera is patrolling the git commit log with a baseball bat! If we install Three.js now, the whole website will crash on mobile! Founder, give Mr. Prakash the definitive verdict on this 3D meat madness!',
       },
       {
         speaker: 'meera',
@@ -1335,9 +1335,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
-        expression: 'happy',
-        text: 'I personally love the optimistic shadow, but founder, how do we prioritize Meera\'s bug avalanche?',
+        role: 'Client Relations ("Chief Motivation Officer")',
+        expression: 'talking',
+        text: 'Aarav, your button has emotional levitation, but clicking it crashes Chrome on Android! Meera has 14 blocker bugs open, Varun is still explaining why the database is morally superior to MongoDB, and Mr. Prakash is testing the site with his Kanpur relatives in 12 hours! Founder, how do we prioritize Meera\'s defect avalanche?!',
       },
     ],
     choices: [
@@ -1405,7 +1405,7 @@ export const founderMissions: FounderMission[] = [
           {
             speaker: 'kunal',
             name: 'Kunal',
-            role: 'Chief Motivation Officer',
+            role: 'Client Relations ("Chief Motivation Officer")',
             expression: 'happy',
             text: 'Velocity over perfection! (Please don\'t crash in production.)',
           },
@@ -1558,16 +1558,16 @@ export const founderMissions: FounderMission[] = [
     objective: 'Protect the release candidate from last-minute ideas.',
     location: 'TEAM ROOM · RELEASE COUNCIL',
     character: 'kunal',
-    characterRole: 'Chief Motivation Officer',
+    characterRole: 'Client Relations ("Chief Motivation Officer")',
     attendees: ['kunal', 'meera', 'aarav', 'varun'],
     briefing: 'Kunal has called an emergency "alignment summit". Aarav wants to add dark mode. Varun wants to refactor routing. Meera wants the payment button tested. Nikhil has gone offline again. The deadline is tomorrow.',
     dialogue: [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'happy',
-        text: 'Welcome to our Emergency 24-Hour Pre-Delivery Alignment Summit! The air is electric! Tomorrow we hand over Royal Feast Catering to the world!',
+        text: 'Welcome to our Emergency 24-Hour Pre-Delivery Alignment Summit! Look at this legendary crew: Aarav has pushed 47 commits and zero documentation, Varun has drawn enough architecture diagrams to wallpaper a 3-bedroom flat, Meera has tested every button under emotional distress, and Nikhil just surfaced with working endpoints! Tomorrow we hand over Royal Feast Catering to Mr. Prakash! How are we locking down this release?!',
       },
       {
         speaker: 'aarav',
@@ -1615,7 +1615,7 @@ export const founderMissions: FounderMission[] = [
           {
             speaker: 'kunal',
             name: 'Kunal',
-            role: 'Chief Motivation Officer',
+            role: 'Client Relations ("Chief Motivation Officer")',
             expression: 'happy',
             text: 'Freezer door is shut! I\'m curating a playlist called "Zero New Commits, Pure Stability"!',
           },
@@ -1687,9 +1687,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Client Liaison (Self-appointed)',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'happy',
-        text: 'T-minus 2 hours until Mr. Prakash and his family join the final delivery call! Look at this presentation deck I made: 42 slides, gradient title cards, founder quotes!',
+        text: 'T-minus 2 hours until Mr. Prakash and his whole joint family join the final delivery call! Team, look at what we survived this week: Aarav survived 14 CSS rebuilds, Varun delivered real working endpoints instead of Miro diagrams, Meera slaughtered 78 blocker bugs, and Nikhil stayed online for 3 straight hours! Look at this presentation deck I made: 42 slides, gradient title cards, founder quotes!',
       },
       {
         speaker: 'meera',
@@ -1722,9 +1722,9 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Client Liaison (Self-appointed)',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'talking',
-        text: 'Founder, how do we structure our rehearsal before the client arrives?',
+        text: 'Mr. Prakash has his chequebook open, but Bunty has a notepad labeled "Phase 2 suggestions". Founder, how do we structure our live demo rehearsal before the client arrives?!',
       },
     ],
     choices: [
@@ -1837,7 +1837,7 @@ export const founderMissions: FounderMission[] = [
       {
         speaker: 'kunal',
         name: 'Kunal',
-        role: 'Chief Motivation Officer',
+        role: 'Client Relations ("Chief Motivation Officer")',
         expression: 'happy',
         text: 'Deep breath everyone. Founder, take us home!',
       },

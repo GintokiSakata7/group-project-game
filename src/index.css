@@ -25,7 +25,8 @@
 html, body, #root {
   margin: 0;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  min-height: 100dvh;
 }
 
 body {
@@ -2345,6 +2346,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   position: relative;
   width: 100%;
   height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   background: #0f172a;
 }
@@ -4242,8 +4245,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .hire-character-stage .character-sprite { z-index:1; }
 .hire-character-name { position:relative; z-index:2; text-align:center; margin-top:13px; }
 .hire-character-name h2 { margin:0; font-size:30px; font-weight:1000; letter-spacing:-.04em; }
-.hire-character-name span { display:block; color:#ffd67a; font-size:14px; font-weight:800; margin-top:4px; }
-.hire-character-stamp { position:absolute; bottom:17px; left:18px; color:#8f81a1; font-size:9px; font-weight:1000; letter-spacing:.16em; }
+.hire-character-name span { display:block; color:#ffd67a; font-size:14px; font-weight:800; margin-top:6px; line-height:1.35; }
+.hire-character-stamp { position:relative; z-index:2; margin-bottom:12px; padding:4px 12px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); color:#c4b5d8; font-size:11px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; }
 .hire-dialogue-panel { padding:12px 0; }
 .hire-speech { margin:17px 0 20px; padding:23px 25px; border-radius:18px; background:#100c1a; border:1px solid #ffffff18; border-left:5px solid #ff6298; color:#fff; font-size:clamp(20px,2.1vw,27px); line-height:1.42; font-weight:800; }
 .hire-facts { display:grid; gap:11px; margin-bottom:22px; }

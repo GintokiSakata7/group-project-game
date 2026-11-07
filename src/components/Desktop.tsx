@@ -4,7 +4,7 @@ import {
   Activity, Bell, BriefcaseBusiness, Bug, CalendarClock, Check, ChevronDown, CircleDollarSign, Clock3,
   Code2, FileText, FolderOpen, GitBranch, Globe, LayoutDashboard, Maximize2,
   MessageSquare, Minus, Monitor, MoreHorizontal, ShieldCheck, Sparkles, Terminal, Users, Wallet, X, Zap,
-  Building2, ArrowLeft
+  Building2, ArrowLeft, Volume2, VolumeX, Music
 } from 'lucide-react';
 import { useGameStore } from '../game/store';
 import type { AppId, DailyReport, GameEvent } from '../game/types';
@@ -18,8 +18,11 @@ import PeopleApp from '../apps/PeopleApp';
 import FinanceApp from '../apps/FinanceApp';
 import FilesApp from '../apps/FilesApp';
 import TerminalApp from '../apps/TerminalApp';
+import WebPreview from '../apps/WebPreview';
+import MusicApp from '../apps/MusicApp';
 import { Pill } from '../apps/shared';
 import { missionsForDay } from '../game/missions';
+import { sound } from '../game/audio';
 
 interface WindowState {
   id: AppId;
@@ -33,21 +36,23 @@ interface WindowState {
 }
 
 const appMeta: Record<AppId, { title: string; subtitle: string; icon: ReactNode; color: string; hint: string }> = {
+  preview: { title: 'Live Staging', subtitle: 'http://localhost:3000', icon: <Globe />, color: 'lime', hint: 'See what your team actually built' },
   chat: { title: 'Team Chat', subtitle: 'Office messages & banter', icon: <MessageSquare />, color: 'blue', hint: 'The source of most problems' },
-  browser: { title: 'Client Desk', subtitle: 'Royal Feast & Bunty requests', icon: <Globe />, color: 'pink', hint: 'Where “one small thing” arrives' },
+  browser: { title: 'Client Desk', subtitle: 'Royal Feast & Bunty requests', icon: <BriefcaseBusiness />, color: 'pink', hint: 'Where “one small thing” arrives' },
   repo: { title: 'Code Studio', subtitle: 'Commits, diffs & evidence', icon: <GitBranch />, color: 'purple', hint: 'Trust, but verify' },
   people: { title: 'Team Room', subtitle: 'Profiles, traits & dynamics', icon: <Users />, color: 'coral', hint: 'Manage the humans' },
   sprint: { title: 'Task Board', subtitle: 'Assignments & progress', icon: <CalendarClock />, color: 'orange', hint: 'Make work visible' },
   qa: { title: 'Build Lab', subtitle: 'Defects & test runs', icon: <ShieldCheck />, color: 'green', hint: 'Meera has notes' },
-  hq: { title: 'Founder Dashboard', subtitle: 'Command centre & KPIs', icon: <LayoutDashboard />, color: 'lime', hint: 'The project at a glance' },
+  music: { title: 'PanicBeats', subtitle: 'Kunal’s Lo-Fi Jukebox', icon: <Sparkles />, color: 'gold', hint: 'Music to code and cry to' },
+  hq: { title: 'Founder Dashboard', subtitle: 'Command centre & KPIs', icon: <LayoutDashboard />, color: 'slate', hint: 'The project at a glance' },
   finance: { title: 'Finance', subtitle: 'Company ledger', icon: <Wallet />, color: 'gold', hint: 'Numbers do not lie' },
   files: { title: 'File Manager', subtitle: 'Company drive', icon: <FolderOpen />, color: 'slate', hint: 'final_final_latest' },
   terminal: { title: 'Build Monitor', subtitle: 'Logs & system status', icon: <Terminal />, color: 'dark', hint: 'It failed for a reason' },
 };
 
-// 6 Primary Adventure Apps + Secondary Utilities
-const primaryApps: AppId[] = ['chat', 'browser', 'repo', 'people', 'sprint', 'qa'];
-const allApps: AppId[] = ['chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'hq', 'finance', 'files', 'terminal'];
+// 7 Primary Adventure Apps + Secondary Utilities
+const primaryApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'music'];
+const allApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'music', 'hq', 'finance', 'files', 'terminal'];
 
 const defaultWindow = (id: AppId, count: number): WindowState => {
   const isWide = typeof window !== 'undefined' ? window.innerWidth > 1024 : true;
@@ -68,6 +73,8 @@ const defaultWindow = (id: AppId, count: number): WindowState => {
 
 function AppContent({ id, openApp }: { id: AppId; openApp: (app: AppId) => void }) {
   switch (id) {
+    case 'preview': return <WebPreview />;
+    case 'music': return <MusicApp />;
     case 'chat': return <ChatApp />;
     case 'browser': return <ClientBrowser />;
     case 'repo': return <RepoStudio />;
@@ -282,6 +289,7 @@ export default function Desktop() {
     phase,
     goToOffice,
     completedMissionIds,
+    activeAppOnDesktop,
   } = useGameStore();
 
   // Start with Team Chat open by default
@@ -291,6 +299,16 @@ export default function Desktop() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [desktopMenu, setDesktopMenu] = useState(false);
+  const [isPlayingMusic, setIsPlayingMusic] = useState(sound.getPlayingTrack().isPlaying);
+  const [isAudioMuted, setIsAudioMuted] = useState(sound.getMuted());
+
+  // Listen for navigation requests to open specific apps
+  useEffect(() => {
+    if (activeAppOnDesktop) {
+      openApp(activeAppOnDesktop);
+      useGameStore.setState({ activeAppOnDesktop: null });
+    }
+  }, [activeAppOnDesktop]);
 
   const unread = notifications.filter((item) => !item.read).length;
   const dayMissions = missionsForDay(day);
@@ -317,6 +335,7 @@ export default function Desktop() {
   }, []);
 
   function openApp(id: AppId) {
+    sound.playClick();
     setWindows((current) => {
       const found = current.find((item) => item.id === id);
       if (found) {
@@ -332,6 +351,7 @@ export default function Desktop() {
   }
 
   function focus(id: AppId) {
+    sound.playClick(true);
     setActiveId(id);
     setWindows((current) => current.map((item) => (item.id === id ? { ...item, z: Math.max(...current.map((win) => win.z)) + 1 } : item)));
   }
@@ -341,14 +361,17 @@ export default function Desktop() {
   }
 
   function toggleMaximize(id: AppId) {
+    sound.playClick();
     setWindows((current) => current.map((item) => (item.id === id ? { ...item, maximized: !item.maximized } : item)));
   }
 
   function close(id: AppId) {
+    sound.playClick();
     setWindows((current) => current.filter((item) => item.id !== id));
   }
 
   function minimize(id: AppId) {
+    sound.playClick();
     setWindows((current) => current.map((item) => (item.id === id ? { ...item, minimized: true } : item)));
   }
 
@@ -381,8 +404,6 @@ export default function Desktop() {
 
   const visibleWindows = windows.filter((item) => !item.minimized);
 
-  if (phase !== 'desktop') return null;
-
   return (
     <main className="desktop-shell">
       {/* Topbar */}
@@ -406,6 +427,29 @@ export default function Desktop() {
         </div>
 
         <div className="system-top-right">
+          <button
+            className={`topbar-music-chip ${isPlayingMusic && !isAudioMuted ? 'is-playing' : ''}`}
+            onClick={() => {
+              openApp('music');
+            }}
+            title="Kunal's Lo-Fi Jukebox (PanicBeats)"
+          >
+            <Music size={13} className={isPlayingMusic && !isAudioMuted ? 'music-note-spin' : ''} />
+            <span>{sound.getPlayingTrack().track.title.slice(0, 18)}...</span>
+          </button>
+
+          <button
+            className="topbar-icon"
+            onClick={() => {
+              const muted = sound.toggleMute();
+              setIsAudioMuted(muted);
+              sound.playClick();
+            }}
+            title={isAudioMuted ? 'Unmute Audio' : 'Mute Audio'}
+          >
+            {isAudioMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+
           <button
             className="topbar-icon"
             onClick={() => {

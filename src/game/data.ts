@@ -10,7 +10,7 @@ import type {
 
 export const initialEmployees: Employee[] = [
   {
-    id: 'kunal', name: 'Kunal', role: 'Frontend Developer', title: 'Chief Motivation Officer', avatar: '☀️', color: '#e8b75f',
+    id: 'kunal', name: 'Kunal', role: 'Client Relations & Content', title: 'Client Relations ("Chief Motivation Officer")', avatar: '☀️', color: '#e8b75f',
     tagline: 'Let’s lock in. I made a playlist.', skills: { frontend: 24, content: 84, design: 48 }, reliability: 68, morale: 88, fatigue: 8, ego: 52, founderTrust: 76, baseProductivity: 8,
     availability: 'online', lastSeen: 'Now', hiddenTrait: 'He is genuinely excellent at client communication and documentation.', discovered: false,
     quirks: ['Sends “good morning legends” before sunrise', 'Has 14 productivity playlists', 'Calls every meeting a “sync-up”'],
@@ -72,7 +72,7 @@ export const initialChannels: ChatChannel[] = [
   { id: 'qa-room', name: 'qa-room', type: 'group', memberIds: ['player', 'aarav', 'meera'], subtitle: 'A safe space for unsafe builds.' },
   { id: 'random', name: 'random-chaos', type: 'group', memberIds: ['player', 'kunal', 'aarav', 'varun', 'meera', 'nikhil'], subtitle: 'Unofficially the most active channel.' },
   { id: 'prakash', name: 'Mr. Prakash', type: 'client', memberIds: ['player', 'prakash'], subtitle: 'Royal Feast Catering · Client' },
-  { id: 'kunal', name: 'Kunal', type: 'direct', memberIds: ['player', 'kunal'], subtitle: 'Chief Motivation Officer' },
+  { id: 'kunal', name: 'Kunal', type: 'direct', memberIds: ['player', 'kunal'], subtitle: 'Client Relations ("Chief Motivation Officer")' },
   { id: 'aarav', name: 'Aarav', type: 'direct', memberIds: ['player', 'aarav'], subtitle: 'AI-powered engineering' },
   { id: 'varun', name: 'Varun', type: 'direct', memberIds: ['player', 'varun'], subtitle: 'Technical Lead' },
   { id: 'meera', name: 'Meera', type: 'direct', memberIds: ['player', 'meera'], subtitle: 'Quality Assurance' },

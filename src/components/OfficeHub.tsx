@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, CheckCircle2, Laptop, Monitor, Sparkles, Users, Zap, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Laptop, Monitor, Sparkles, Users, Zap, X, Globe, Music, Volume2, VolumeX } from 'lucide-react';
 import { useGameStore } from '../game/store';
 import { CharacterSprite, type CharacterId, type Expression } from './CharacterSprite';
 import type { DailyReport, Employee, GameEvent } from '../game/types';
 import MissionControl from './MissionControl';
 import { missionsForDay } from '../game/missions';
+import { sound } from '../game/audio';
 
 const dailyOpeners: Record<number, { title: string; line: string; mission: string }> = {
   1: { title: 'DAY 01 · THE KICKOFF', line: 'The team has assembled. Kunal brought a speaker. Aarav brought 19 dependencies. Nikhil brought his online status down.', mission: 'Get a real plan out of a room full of confidence.' },
@@ -21,14 +22,14 @@ const dayLine = (day: number, lines: Record<number, string>, fallback: string) =
 
 const characterDialogue: Record<string, { expression: Expression; line: (employee: Employee, day: number) => string; hint: string }> = {
   kunal: { expression: 'happy', line: (_e, day) => dayLine(day, {
-    1: '“Founder, I have prepared a kickoff playlist, a morale framework and a motivational quote. I have not opened the task board. One thing at a time.”',
-    2: '“The client update is ready. It says we are making excellent progress. I wrote it before checking the progress, because confidence is a deliverable.”',
-    3: '“I have mediated the Aarav–Meera conflict. They are no longer speaking. I think that means the meeting was successful.”',
-    4: '“I can present the preview. I have already practised saying ‘enterprise-grade’ in three accents.”',
-    5: '“The client seems happy. Bunty has sent me a voice note. I have marked it as unread for team wellbeing.”',
-    6: '“Feature freeze! I made a playlist called Cold but Focused. It is mostly the same song with different file names.”',
-    7: '“Final day, legends! I made a playlist called We Definitely Tested This. It has a very optimistic ending.”',
-  }, '“Morale is high. Output is a separate department. I am the department.”'), hint: 'Kunal is not your primary coder. Use him for client communication, documentation, morale and keeping the room from becoming a courtroom.' },
+    1: '“Founder, Aarav is building 14 animated divs with zero forms, Varun is preparing a 47-slide Miro deck, and Meera is inspecting the CSS padding! Leave Mr. Prakash to me—I told him our agile velocity is currently off the charts!”',
+    2: '“I checked Aarav’s localhost. The WhatsApp enquiry button executes window.alert("spiritual placeholder"). I told Mr. Prakash this is modern web poetry while Nikhil commits the real API!”',
+    3: '“Bunty sent an audio note asking for 3D biryani. I told him we are evaluating the metaphysical feasibility. Meera threatened to unplug the router.”',
+    4: '“I practised our client presentation in three regional accents! If Aarav’s photo carousel doesn’t load, I will personally mime the samosas!”',
+    5: '“Mr. Prakash wants to see the staging preview on his 65-inch hall TV! Aarav has 3 mock dishes: Samosa, Biryani, and Lorem Ipsum Naan. I am telling them Lorem Ipsum is an authentic Lucknowi spice blend.”',
+    6: '“Code freeze! Varun wants to refactor routing, Aarav wants dark mode, and Meera is guarding the git branch with pepper spray! I made a playlist called Zero New Commits.”',
+    7: '“Final handover call today, legends! Look at us: we survived 7 days without anyone getting arrested! The biryani website actually works! Founder, let’s close this deal!”',
+  }, '“Morale is high. Output is a separate department. I am the department.”'), hint: 'Kunal is your client relations specialist and morale anchor. Use him to pacify client panic, handle documentation, and prevent meetings from becoming courtroom battles.' },
   aarav: { expression: 'smug', line: (_e, day) => dayLine(day, {
     1: '“Bro, the frontend is 80% done. I counted the divs. I have not run the app yet because I respect suspense.”',
     2: '“I pushed 14 commits. Seven are fixes for the other seven. That is what we call a closed-loop workflow.”',
@@ -115,15 +116,22 @@ export default function OfficeHub() {
 
   const teammateLine = (employee: Employee) => characterDialogue[employee.id]?.line(employee, day) ?? '“I am here. I have no idea why.”';
 
-  const interact = (employeeId: string) => { setSelectedEmpId(employeeId); setDialogueText(null); };
+  const interact = (employeeId: string) => {
+    sound.playClick();
+    setSelectedEmpId(employeeId);
+    setDialogueText(null);
+  };
   const act = (kind: 'motivate' | 'pair' | 'audit' | 'investigate') => {
     if (!selectedEmployee || actionsLeft <= 0) return;
+    sound.playClick();
     if (kind === 'investigate' && !selectedEmployee.discovered) {
       discoverTrait(selectedEmployee.id);
+      sound.playSuccess();
       setDialogueText(`You discovered something about ${selectedEmployee.name}. It explains a lot. Unfortunately.`);
       return;
     }
     performAction(kind, selectedEmployee.id);
+    sound.playSuccess();
     const messages: Record<string, string> = {
       motivate: `${selectedEmployee.name} feels appreciated. Productivity remains under investigation.`,
       pair: `You paired with ${selectedEmployee.name}. Actual work has occurred. Witnesses confirm.`,
@@ -134,6 +142,7 @@ export default function OfficeHub() {
   };
 
   const closeDay = () => {
+    sound.playCash();
     endDay();
     if (day < 7) setShowReport(true);
   };
@@ -144,7 +153,14 @@ export default function OfficeHub() {
       <header className="game-office-topbar">
         <div className="game-office-brand"><span className="new-brand-mark">M</span><div><b>{companyName}</b><small>THE GROUP PROJECT</small></div></div>
         <div className="game-day-banner"><span>DAY {day} <i>/ 7</i></span><b>{opener.title.replace(`DAY 0${day} · `, '')}</b></div>
-        <div className="game-office-right"><span className="game-mini-stat">₹{metrics.cash.toLocaleString('en-IN')}</span><span className="game-mini-stat"><Zap size={15} /> {actionsLeft} ACTIONS</span><button className="game-computer-button" onClick={openDesktop}><Monitor size={17} /> OPEN COMPUTER</button></div>
+        <div className="game-office-right">
+          <span className="game-mini-stat">₹{metrics.cash.toLocaleString('en-IN')}</span>
+          <span className="game-mini-stat"><Zap size={15} /> {actionsLeft} ACTIONS</span>
+          <button className="game-staging-button" onClick={() => openDesktop('preview')} title="Inspect the live catering website">
+            <Globe size={15} /> LIVE STAGING
+          </button>
+          <button className="game-computer-button" onClick={() => openDesktop()}><Monitor size={17} /> OPEN COMPUTER</button>
+        </div>
       </header>
 
       <section className="game-office-main">
@@ -185,7 +201,17 @@ export default function OfficeHub() {
         <div className="game-office-bottom">
           <div className="game-office-left-note"><div className="game-note-icon">☕</div><div><b>{doneTasks}/{tasks.length} tasks complete</b><span>{criticalBugs ? `${criticalBugs} critical bug(s) still open. Meera is aware.` : 'No critical bugs reported. Suspicious.'}</span></div></div>
           <div className="game-office-progress"><div><span>PROJECT PROGRESS</span><b>{progress}%</b></div><i><span style={{ width: `${progress}%` }} /></i></div>
-          <div className="game-office-actions"><button className="game-open-workspace" onClick={openDesktop}><Laptop size={18} /> OPEN WORKSTATION</button><button className="game-end-day" disabled={Boolean(pendingEvent) || !missionsComplete} onClick={closeDay}>{day === 7 ? 'DELIVER PROJECT' : missionsComplete ? 'END THE DAY' : `MISSIONS ${dayMissions.filter((mission) => completedMissionIds.includes(mission.id)).length}/${dayMissions.length}`}  <ArrowRight size={18} /></button></div>
+          <div className="game-office-actions">
+            <button className="game-preview-workspace" onClick={() => openDesktop('preview')}>
+              <Globe size={17} /> LIVE STAGING (localhost:3000)
+            </button>
+            <button className="game-open-workspace" onClick={() => openDesktop()}>
+              <Laptop size={18} /> WORKSTATION
+            </button>
+            <button className="game-end-day" disabled={Boolean(pendingEvent) || !missionsComplete} onClick={closeDay}>
+              {day === 7 ? 'DELIVER PROJECT' : missionsComplete ? 'END THE DAY' : `MISSIONS ${dayMissions.filter((mission) => completedMissionIds.includes(mission.id)).length}/${dayMissions.length}`} <ArrowRight size={18} />
+            </button>
+          </div>
         </div>
       </section>
 

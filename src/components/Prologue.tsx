@@ -17,7 +17,7 @@ interface HireScene {
 
 const hires: HireScene[] = [
   {
-    character: 'kunal', name: 'Kunal', title: 'Chief Motivation Officer', expression: 'happy',
+    character: 'kunal', name: 'Kunal', title: 'Client Relations ("Chief Motivation Officer")', expression: 'happy',
     quote: '“TEAM! We are not building a product. We are building a LEGACY. I made a playlist called Deploy or Die.”',
     talent: 'Keeps the team cheerful and talks to clients confidently.', warning: 'Has never deployed anything. Including himself.', badge: 'HIRE #01 · HYPE DEPARTMENT',
   },
@@ -150,9 +150,9 @@ export default function Prologue() {
               <div className="hire-scene-grid">
                 <div className="hire-character-stage">
                   <div className={`character-halo halo-${scene.character}`} />
+                  <div className="hire-character-stamp">{isFounder ? 'DAY 00 · THE FOUNDER' : `EMPLOYEE ${String(hireIndex + 1).padStart(2, '0')}`}</div>
                   <CharacterSprite character={scene.character} size="xl" expression={scene.expression} speaking />
                   <div className="hire-character-name"><h2>{scene.name}</h2><span>{scene.title}</span></div>
-                  <div className="hire-character-stamp">{isFounder ? 'THE PERSON WITH THE IDEA' : `EMPLOYEE ${String(hireIndex + 1).padStart(2, '0')}`}</div>
                 </div>
                 <div className="hire-dialogue-panel">
                   <span className="story-eyebrow">{isFounder ? 'A VERY CONFIDENT DECISION' : 'NEW HIRE · CONTRACT SIGNED'}</span>

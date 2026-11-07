@@ -18,6 +18,7 @@ import {
 import { useGameStore } from '../game/store';
 import { missionsForDay, type FounderMission, type MissionChoice, type DialogueLine } from '../game/missions';
 import { CharacterSprite, type CharacterId, type Expression } from './CharacterSprite';
+import { sound } from '../game/audio';
 
 const characterColors: Record<CharacterId, { bg: string; accent: string; border: string }> = {
   kunal: { bg: '#fff7ed', accent: '#f59e0b', border: '#fbbf24' },
@@ -84,6 +85,7 @@ export default function MissionControl({ day }: { day: number }) {
   const currentReaction = reactionList[reactionStep] || null;
 
   const startMission = (mission: FounderMission) => {
+    sound.playClick();
     setMissionId(mission.id);
     setPhase('dialogue');
     setStep(0);
@@ -93,6 +95,7 @@ export default function MissionControl({ day }: { day: number }) {
   };
 
   const closeModal = () => {
+    sound.playClick();
     setMissionId(null);
     setResult(null);
     setPhase('dialogue');
@@ -102,6 +105,7 @@ export default function MissionControl({ day }: { day: number }) {
   };
 
   const handleNextDialogue = () => {
+    sound.playClick(true);
     if (step < dialogueList.length - 1) {
       setStep((prev) => prev + 1);
     } else {
@@ -110,18 +114,21 @@ export default function MissionControl({ day }: { day: number }) {
   };
 
   const handlePrevDialogue = () => {
+    sound.playClick(true);
     if (step > 0) {
       setStep((prev) => prev - 1);
     }
   };
 
   const handleSkipToDecision = () => {
+    sound.playClick();
     setStep(dialogueList.length - 1);
     setPhase('decision');
   };
 
   const handleChoose = (choice: MissionChoice) => {
     if (!selectedMission) return;
+    sound.playSuccess();
     completeFounderMission(selectedMission.id, choice.id);
     setResult(choice);
     if (choice.reactions && choice.reactions.length > 0) {
@@ -133,9 +140,11 @@ export default function MissionControl({ day }: { day: number }) {
   };
 
   const handleNextReaction = () => {
+    sound.playClick(true);
     if (reactionStep < reactionList.length - 1) {
       setReactionStep((prev) => prev + 1);
     } else {
+      sound.playSuccess();
       setPhase('cleared');
     }
   };

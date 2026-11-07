@@ -5,6 +5,7 @@ import ContractSigned from './components/ContractSigned';
 import TeamKickoff from './components/TeamKickoff';
 import OfficeHub from './components/OfficeHub';
 import Desktop from './components/Desktop';
+import ClientDemoCall from './components/ClientDemoCall';
 import GameOver from './components/GameOver';
 import DeliveryResults from './components/DeliveryResults';
 import { useGameStore } from './game/store';
@@ -18,6 +19,7 @@ export default function App() {
   if (phase === 'kickoff_meeting') return <TeamKickoff />;
   if (phase === 'office') return <OfficeHub />;
   if (phase === 'desktop') return <Desktop />;
+  if (phase === 'live_demo') return <ClientDemoCall />;
   if (phase === 'game_over') return <GameOver />;
   if (phase === 'ending') return <DeliveryResults />;
 

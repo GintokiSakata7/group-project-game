@@ -8,7 +8,9 @@ export type AppId =
   | 'people'
   | 'finance'
   | 'files'
-  | 'terminal';
+  | 'terminal'
+  | 'preview'
+  | 'music';
 
 export type Phase =
   | 'title'
@@ -19,6 +21,7 @@ export type Phase =
   | 'kickoff_meeting'
   | 'office'
   | 'desktop'
+  | 'live_demo'
   | 'game_over'
   | 'ending';
 export type Availability = 'online' | 'busy' | 'offline' | 'afk';
@@ -215,6 +218,7 @@ export interface GameState {
   scopeAccepted: string[];
   completedMissionIds: string[];
   roleAssignments: Record<string, string>;
+  activeAppOnDesktop?: AppId | null;
 }
 
 export type ActionKind = 'code' | 'motivate' | 'pair' | 'audit' | 'client' | 'triage' | 'investigate';

@@ -18,7 +18,7 @@ interface GameStore extends GameState {
   beginNegotiation: () => void;
   triggerGameOver: (info: GameOverInfo) => void;
   goToOffice: () => void;
-  openDesktop: () => void;
+  openDesktop: (initialApp?: AppId) => void;
   startCampaign: (setup: CampaignSetup) => void;
   resetGame: () => void;
   performAction: (kind: ActionKind, targetId?: string) => void;
@@ -114,7 +114,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
   triggerGameOver: (info) => set({ phase: 'game_over', gameOver: info }),
   goToOffice: () => set({ phase: 'office' }),
   beginKickoffMeeting: () => set({ phase: 'kickoff_meeting' }),
-  openDesktop: () => set({ phase: 'desktop' }),
+  openDesktop: (initialApp) => set({ phase: 'desktop', activeAppOnDesktop: initialApp ?? null }),
 
   startCampaign: (setup) => {
     const price = setup.contractPrice;
@@ -614,7 +614,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
     if ((state.phase !== 'desktop' && state.phase !== 'office') || state.pendingEvent) return;
     const requiredMissions = founderMissions.filter((mission) => mission.day === state.day);
     if (requiredMissions.some((mission) => !state.completedMissionIds.includes(mission.id))) return;
-    if (state.day >= 7) { get().deliverProject(); return; }
+    if (state.day >= 7) { set({ phase: 'live_demo' }); return; }
     const result = resolveDay(state);
     const nextDay = state.day + 1;
     const newMessages = [...state.messages, ...result.messages];
@@ -663,7 +663,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   deliverProject: () => {
     const state = get();
-    if (state.phase !== 'desktop' && state.phase !== 'office') return;
+    if (state.phase !== 'desktop' && state.phase !== 'office' && state.phase !== 'live_demo') return;
     const requiredMissions = founderMissions.filter((mission) => mission.day === state.day);
     if (requiredMissions.some((mission) => !state.completedMissionIds.includes(mission.id))) return;
     const finalResolution = state.day >= 7 && !state.dailyReports.some((report) => report.day === 7) ? resolveDay(state) : null;
