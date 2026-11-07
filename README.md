@@ -1,16 +1,56 @@
-# The Group Project
+# The Group Project — A Majin Studios Comedy Adventure
 
-**A startup survival simulator disguised as a fictional desktop operating system.**
+> You founded a software company. You hired five questionable employees. A client called. Now you have seven days to ship something.
 
-You founded PANIC LABS, hired five employees, and won one client who wants “a simple website like Swiggy” for ₹500. Negotiate a realistic first release, manage a dysfunctional team for seven in-game days, inspect simulated repository evidence, survive scope creep, and deliver before the client discovers Bunty has opinions.
+This is a browser-first, story-led workplace comedy game. The player experiences the campaign one scene at a time; the fictional desktop becomes an in-world tool after the client signs the deal, not the opening dashboard.
 
-This is a complete frontend-first game prototype built with React, TypeScript and Vite. All code activity, commits, builds, client conversations and employee behaviour are simulated locally. It does not connect to GitHub, run submitted code, or call an AI API.
+## Story flow
 
-## Requirements
+1. **Title screen** — start a new campaign.
+2. **Company foundation** — name the studio and register the company.
+3. **Founder scene** — establish the player's role and the startup's situation.
+4. **Team recruitment** — meet Kunal, Aarav, Varun, Meera and Nikhil one at a time, with short character-led scenes.
+5. **Incoming client call** — answer Mr. Prakash, then play the negotiation sequence with his nephew Bunty interrupting.
+6. **Contract signed** — a short celebration scene starts the seven-day delivery deadline.
+7. **Post-signature kickoff meeting** — assign one primary owner to each of five workstreams before the delivery clock starts.
+8. **Seven-day founder campaign** — each day has two required story missions. These are concrete founder objectives (run a stand-up, demand a live demo, inspect a commit, negotiate scope, triage QA, verify a handoff, rehearse delivery), not generic dashboard tasks. The player chooses a response and sees the consequences. Both story missions must be completed before the day can close.
+9. **Office hub** — visit the team floor, click employees to talk, spend optional founder actions, inspect the daily mission board and open the workstation. Character dialogue changes across the week.
+10. **Desktop OS** — use Team Chat, Client Desk, Code Studio, Team Room, Task Board and Build Lab to investigate the fictional company. The desktop is an in-world tool; it cannot skip required story missions.
+11. **Delivery and result** — the simulation evaluates deliverables, quality, client trust and team chaos, then creates a shareable campaign scorecard.
 
-- Node.js **22.12+** (Node 22 LTS recommended)
-- npm 10+
-- A modern desktop browser (Chrome, Edge or Firefox recommended)
+The main story remains linear. Decisions affect the simulation, character relationships and ending quality; they do not create separate campaigns. Fatal negotiation decisions lead to Game Over.
+
+## The team
+
+- **Kunal — Chief Motivation Officer:** speaks in motivational speeches, curates playlists and boosts morale. Actual code output is a separate department.
+- **Aarav — Full-Stack Vibe Coder:** fast AI-assisted implementation, mystery dependencies and questionable tests.
+- **Varun — Technical Lead:** confident architecture claims; ask for working evidence rather than another diagram.
+- **Meera — QA:** catches critical bugs and pixel-level defects, sometimes in the same breath.
+- **Nikhil — Backend Developer:** rarely available; occasionally appears and solves the hardest problem in the room.
+- **Bunty:** the client's nephew and self-appointed technology consultant. He is not an employee; he is a recurring source of scope creep.
+
+## Game design principles
+
+- One clear story stage or decision at a time; avoid front-loading dashboards and statistics.
+- The player is the founder and active protagonist. Daily missions ask them to go speak to people, call meetings, inspect evidence and make decisions.
+- The seven-day campaign has two required missions per day; optional desktop interactions add context but do not replace the main story.
+- Character portraits, readable dialogue and expressive reactions carry the humour.
+- The office hub is the game space; the desktop is an optional diegetic workstation.
+- The simulation engine remains in TypeScript/Zustand. UI components present the game; they do not duplicate game rules.
+- No real GitHub, email, client messaging or AI APIs are connected. All business activity is fictional game content.
+
+## Visual assets
+
+Local WebP assets are included in `public/assets/` and `public/assets/characters/`. Character portraits and scene artwork were created for this prototype and are bundled locally so the game does not rely on remote hotlinks at runtime.
+
+## Tech stack
+
+- React 19 + TypeScript + Vite
+- Zustand with persistence for campaign state
+- Motion for scene transitions and character reactions
+- Tailwind CSS plus custom game-specific CSS
+- Lucide React icons
+- Vitest for simulation tests
 
 ## Run locally
 
@@ -19,114 +59,16 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (normally `http://localhost:5173`).
+Open `http://localhost:5173`.
 
-## Production build
+## Test and build
 
 ```bash
+npm test
 npm run build
 npm run preview
 ```
 
-The production output is generated in `dist/` and can be deployed to Vercel, Netlify, Cloudflare Pages or any static hosting provider.
+## First playthrough
 
-## Tests
-
-```bash
-npm test
-```
-
-The simulation tests cover seeded day resolution, bounded stats, backlog handling, relationship effects, incident-content validation and final delivery scoring. Each new campaign receives a seed, so repeated campaigns vary while a single save remains reproducible during debugging.
-
-## How to play
-
-1. Start a campaign and negotiate the Royal Feast contract.
-2. Discover the real business problem, sort requirements into phases, choose an implementation approach, pitch the value, and set viable commercials.
-3. Once the contract is signed, ALMOSTOS opens. The first incident asks you to make a decision before the workday begins.
-4. Open apps from desktop icons, the dock or the launcher.
-5. Use Team Chat to talk to the group, individuals and the client. Messages can change trust, scope and relationships.
-6. Use Repo Studio to compare employee claims with simulated commits and verified progress.
-7. Use Sprint Board to assign unowned tasks during planning for free. Changing an existing owner costs one daily action. Tasks in Review can be approved when progress and quality evidence are sufficient.
-8. Use Project HQ to spend three management actions per day. Monitoring is free; interventions cost one action.
-9. Resolve incidents, end each day, review the daily report, and repeat through Day 7.
-10. On Day 7, deliver the project. Acceptance requires at least five of seven core deliverables at usable progress, adequate quality, client trust and no open critical defects.
-
-### Useful controls
-
-- Click desktop icons or dock icons to open applications.
-- Drag a window by its title bar on desktop screens.
-- Use the window controls to minimise, maximise or close windows.
-- Use the launcher button at the bottom-left to open any app.
-- `Ctrl/Cmd + 1` opens Project HQ; `Ctrl/Cmd + 2` opens Team Chat.
-- On mobile, application windows switch to a full-screen layout.
-
-## Included applications
-
-| App | Purpose |
-|---|---|
-| Project HQ | Delivery metrics, team pulse and management actions |
-| Team Chat | Channels, direct messages, client conversation and comedy |
-| Repo Studio | Commit history, simulated diffs, build/test status and contribution evidence |
-| Sprint Board | Kanban tasks, assignments, priorities and approvals |
-| Client Browser | Contract, accepted scope and client messages |
-| QA Laboratory | Defects, severity and fixes |
-| People | Employee profiles, hidden traits and relationship dynamics |
-| Finance | Contract, advance, balance and simulated ledger |
-| File Manager | Fictional project documents and client assets |
-| Build Monitor | Simulated terminal and build logs |
-
-## Project architecture
-
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the module map and extension points, and [`docs/GAMEPLAY.md`](docs/GAMEPLAY.md) for campaign rules, event flow and acceptance conditions.
-
-```text
-React UI
-  └── ALMOSTOS desktop shell
-        ├── Window manager / launcher / taskbar / notifications
-        └── Applications
-              ├── Chat, Repo, Sprint, Client, QA, People, Finance, Files, Terminal
-
-Zustand game store
-  ├── Campaign state and persistence
-  ├── Employee and relationship state
-  ├── Task, chat, commit and defect state
-  └── Player actions and event decisions
-
-Pure TypeScript simulation engine
-  ├── Daily employee execution
-  ├── Productivity and task progress
-  ├── Simulated repository evidence
-  └── Delivery score and endings
-```
-
-The simulation engine is deliberately independent from React components. Content is data-driven so the campaign can grow with additional clients, event packs and employee archetypes without rewriting the desktop shell.
-
-## Save data
-
-The campaign is saved in browser LocalStorage under `the-group-project-save`. The current save version includes a migration for older prototype saves. Use the ALMOSTOS launcher’s **Power off** control or the ending screen’s restart button to clear the current campaign and start again. Clearing browser site data also removes the local save.
-
-## Current scope and honest limitations
-
-- One campaign: Royal Feast Catering.
-- One seven-day delivery cycle.
-- Five employee archetypes and one recurring client-side NPC (Bunty appears in event writing).
-- Scripted, state-aware messages and conditional incidents; direct messages can change employee trust and morale, and engineering conversations can shift team relationships. No AI-generated dialogue.
-- Repository commits, code diffs, terminal output and test statuses are fictional evidence generated by the game engine. Repo Studio displays employee claims alongside verified task progress so you can catch inflated status reports.
-- No real deployment, Git operations, code execution, user accounts, backend, multiplayer or online leaderboard.
-- Desktop is the primary experience. Mobile receives a full-screen app layout, not overlapping desktop windows.
-
-## Tech stack
-
-- React 19.3
-- TypeScript
-- Vite 8
-- Tailwind CSS 4 (Vite plugin; custom CSS provides the game-specific design system)
-- Zustand 5
-- Motion for React
-- Lucide React
-- Zod 4
-- Vitest
-
-## License
-
-MIT. See `LICENSE`.
+Start a new campaign, name the company, meet the founder and five hires, hold the pre-client team huddle, answer Mr. Prakash's call, negotiate scope and payment terms, then assign workstreams in the post-signature kickoff. During the seven-day campaign, clear the two founder missions shown for each day before advancing. Use the desktop to inspect evidence and conversations, not as a substitute for the story.

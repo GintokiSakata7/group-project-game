@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { campaignEvents, initialChannels, initialDefects, initialEmployees, initialMessages, initialRelationships, initialTasks } from './data';
+import { initialChannels, initialDefects, initialEmployees, initialMessages, initialRelationships, initialTasks } from './data';
 import { calculateDeliveryScore, clamp, resolveDay } from './engine';
-import { validateGameEvent } from './validation';
-import type { ActionKind, AppId, ChatMessage, Defect, Ending, GameEvent, GameState, NotificationItem, ProjectTask } from './types';
+import { founderMissions } from './missions';
+import type { ActionKind, AppId, ChatMessage, Defect, Ending, GameEvent, GameOverInfo, GameState, NotificationItem, Phase, ProjectTask } from './types';
 
 interface CampaignSetup {
   scopeAccepted: string[];
@@ -12,7 +12,13 @@ interface CampaignSetup {
 }
 
 interface GameStore extends GameState {
+  setPhase: (phase: Phase) => void;
+  beginPrologue: () => void;
+  beginClientMeeting: () => void;
   beginNegotiation: () => void;
+  triggerGameOver: (info: GameOverInfo) => void;
+  goToOffice: () => void;
+  openDesktop: () => void;
   startCampaign: (setup: CampaignSetup) => void;
   resetGame: () => void;
   performAction: (kind: ActionKind, targetId?: string) => void;
@@ -26,6 +32,9 @@ interface GameStore extends GameState {
   markNotificationsRead: () => void;
   discoverTrait: (employeeId: string) => void;
   dismissEvent: () => void;
+  beginKickoffMeeting: () => void;
+  completeKickoff: (assignments: Record<string, string>) => void;
+  completeFounderMission: (missionId: string, choiceId: string) => void;
 }
 
 const makeMessage = (channelId: string, senderId: string, senderName: string, text: string, day: number, kind: ChatMessage['kind'] = 'normal'): ChatMessage => ({
@@ -42,7 +51,7 @@ const makeNotification = (title: string, body: string, app: AppId, tone: Notific
 const confrontationalFallback = (text: string) => /where were you|why didn't|why did you|late again|deadline|you promised/i.test(text);
 
 const initialState = (): GameState => ({
-  phase: 'title', companyName: 'PANIC LABS', clientName: 'Mr. Prakash', projectName: 'Royal Feast Digital Presence', contractValue: 5000, day: 1, campaignSeed: Math.floor(Math.random() * 1_000_000_000), actionsLeft: 3,
+  phase: 'title', companyName: 'PANIC LABS', clientName: 'Mr. Prakash', projectName: 'Royal Feast Digital Presence', contractValue: 5000, day: 1, campaignSeed: Math.floor(Math.random() * 1_000_000_000), actionsLeft: 5,
   metrics: { progress: 3, quality: 58, clientTrust: 74, morale: 72, technicalDebt: 12, cash: 2500, scopeCreep: 0, bugsOpen: 4 },
   employees: initialEmployees.map((employee) => ({ ...employee })),
   relationships: initialRelationships.map((relationship) => ({ ...relationship })),
@@ -50,34 +59,146 @@ const initialState = (): GameState => ({
   channels: initialChannels.map((channel) => ({ ...channel })),
   messages: initialMessages.map((message) => ({ ...message })),
   commits: [], defects: initialDefects.map((defect) => ({ ...defect })),
-  pendingEvent: null, notifications: [], dailyReports: [], ending: null, lastAction: '', tutorialSeen: false, scopeAccepted: ['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo'],
+  pendingEvent: null, notifications: [], dailyReports: [], ending: null, gameOver: null, lastAction: '', tutorialSeen: false, scopeAccepted: ['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo'],
+  completedMissionIds: [], roleAssignments: { kunal: 'communication', aarav: 'frontend', varun: 'technical', meera: 'quality', nikhil: 'backend' },
 });
 
 const endingFor = (kind: Ending['kind'], title: string, subtitle: string, body: string, score?: number): Ending => ({ kind, title, subtitle, body, score });
 
+const memoryStorage = (() => {
+  const store = new Map<string, string>();
+  return {
+    getItem: (key: string): string | null => store.get(key) ?? null,
+    setItem: (key: string, value: string): void => {
+      store.set(key, value);
+    },
+    removeItem: (key: string): void => {
+      store.delete(key);
+    },
+  };
+})();
+
+const getStorage = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return window.localStorage;
+    }
+  } catch {}
+  return memoryStorage;
+};
+
 export const useGameStore = create<GameStore>()(persist((set, get) => ({
   ...initialState(),
 
-  beginNegotiation: () => set({ phase: 'negotiation' }),
+  setPhase: (phase) => set({ phase }),
+  beginPrologue: () => set({ ...initialState(), phase: 'prologue' }),
+  beginClientMeeting: () => set({ phase: 'client_meeting' }),
+  beginNegotiation: () => set({ phase: 'client_meeting' }),
+  triggerGameOver: (info) => set({ phase: 'game_over', gameOver: info }),
+  goToOffice: () => set({ phase: 'office' }),
+  beginKickoffMeeting: () => set({ phase: 'kickoff_meeting' }),
+  openDesktop: () => set({ phase: 'desktop' }),
 
   startCampaign: (setup) => {
     const price = setup.contractPrice;
+    const companyName = get().companyName || 'PANIC LABS';
     const fresh = initialState();
     set({
       ...fresh,
-      phase: 'desktop',
+      companyName,
+      phase: 'contract_signed',
       contractValue: price,
       day: 1,
-      actionsLeft: 3,
+      actionsLeft: 5,
       metrics: { ...fresh.metrics, cash: Math.max(500, Math.round(price * 0.5)), clientTrust: clamp(68 + setup.negotiationScore * 0.22), progress: 3 },
       scopeAccepted: setup.scopeAccepted,
-      pendingEvent: validateGameEvent(campaignEvents[1]),
+      pendingEvent: null,
       notifications: [makeNotification('CONTRACT SIGNED', `Royal Feast is officially on the board. ₹${price.toLocaleString('en-IN')} project value. Seven days. Five employees. Deep breaths.`, 'browser', 'success', 1)],
       messages: [
         ...fresh.messages,
         makeMessage('general', 'system', 'ALMOSTOS', 'New project workspace created: ROYAL FEAST. Deadline: 7 days. Management actions available: 3/day.', 1, 'system'),
         makeMessage('general', 'kunal', 'Kunal', 'WE GOT A CLIENT!!! I am making a celebration playlist. Nobody panic. (I am panicking.)', 1, 'funny'),
+        makeMessage('general', 'varun', 'Varun', 'I will lead the technical workstream. The architecture is already 90% complete.', 1, 'funny'),
+        makeMessage('general', 'meera', 'Meera', 'Please define acceptance criteria before anyone says 90%.', 1),
+        makeMessage('general', 'aarav', 'Aarav', 'I have scaffolded the project. It has 11 dependencies and one button. We are moving.', 1, 'funny'),
+        makeMessage('general', 'nikhil', 'Nikhil', 'seen', 1),
       ],
+    });
+  },
+
+  completeKickoff: (assignments) => {
+    const state = get();
+    if (state.phase !== 'kickoff_meeting') return;
+    const taskOwners: Record<string, string[]> = {
+      communication: ['contact', 'seo', 'presentation'],
+      frontend: ['homepage', 'catalogue', 'responsive'],
+      technical: ['architecture', 'integration'],
+      quality: ['qa'],
+      backend: ['whatsapp', 'deployment'],
+    };
+    const alwaysNeeded = new Set(['deployment', 'qa', 'integration', 'architecture', 'presentation']);
+    const tasks = state.tasks.map((task) => {
+      const inScope = state.scopeAccepted.includes(task.id) || alwaysNeeded.has(task.id);
+      if (!inScope) return { ...task, assignedTo: null, status: 'backlog' as const, deliverable: false };
+      const owner = Object.entries(assignments).find(([, workstream]) => taskOwners[workstream]?.includes(task.id))?.[0];
+      const isContractDeliverable = state.scopeAccepted.includes(task.id) || task.id === 'deployment';
+      return owner ? { ...task, assignedTo: owner, deliverable: isContractDeliverable, status: task.progress > 0 ? 'in_progress' as const : 'assigned' as const } : { ...task, deliverable: isContractDeliverable };
+    });
+    const employeeLines: Record<string, string> = {
+      kunal: 'I have accepted responsibility for client communication. I will also be the emotional support department.',
+      aarav: 'Frontend assigned. I have already created the component. It renders a div. Big day.',
+      varun: 'Technical ownership confirmed. I will send the architecture after I finish the architecture of the architecture.',
+      meera: 'QA ownership confirmed. Please stop merging directly to main. I am begging.',
+      nikhil: 'backend assigned. will send progress when network permits.',
+    };
+    const messages = [...state.messages, makeMessage('general', 'system', 'ALMOSTOS', 'Kickoff meeting closed. Workstream ownership has been recorded. The deadline is now real.', 1, 'system'), ...Object.entries(assignments).map(([id]) => makeMessage('general', id, state.employees.find((e) => e.id === id)?.name ?? id, employeeLines[id] ?? 'Assignment received.', 1, 'funny'))];
+    set({ phase: 'office', roleAssignments: assignments, tasks, messages, lastAction: 'Kickoff meeting completed. Day 1 is ready.' });
+  },
+
+  completeFounderMission: (missionId, choiceId) => {
+    const state = get();
+    if (state.phase !== 'office' && state.phase !== 'desktop') return;
+    if (state.completedMissionIds.includes(missionId)) return;
+    const mission = founderMissions.find((item) => item.id === missionId && item.day === state.day);
+    const choice = mission?.choices.find((item) => item.id === choiceId);
+    if (!mission || !choice) return;
+    const effects = choice.effects;
+    const metrics = { ...state.metrics };
+    (['progress', 'quality', 'clientTrust', 'morale', 'technicalDebt', 'scopeCreep'] as const).forEach((key) => {
+      const delta = effects[key];
+      if (typeof delta === 'number') metrics[key] = clamp(metrics[key] + delta);
+    });
+    if (typeof effects.cash === 'number') metrics.cash = Math.max(0, metrics.cash + effects.cash);
+    const employees = state.employees.map((employee) => ({
+      ...employee,
+      morale: clamp(employee.morale + (effects.employeeMorale?.[employee.id] ?? 0)),
+      fatigue: clamp(employee.fatigue + (effects.employeeFatigue?.[employee.id] ?? 0)),
+    }));
+    const tasks = state.tasks.map((task) => {
+      const progressDelta = effects.taskProgress?.[task.id] ?? 0;
+      const qualityDelta = effects.taskQuality?.[task.id] ?? 0;
+      const progress = clamp(task.progress + progressDelta);
+      return {
+        ...task, progress, verifiedProgress: clamp(task.verifiedProgress + progressDelta),
+        reportedProgress: clamp(task.reportedProgress + progressDelta), quality: clamp(task.quality + qualityDelta),
+        status: progress >= 99 ? 'review' as const : progress > 0 ? 'in_progress' as const : task.status,
+      };
+    });
+    const defects = state.defects.map((defect) => effects.fixDefects?.includes(defect.id) ? { ...defect, fixed: true } : defect);
+    metrics.progress = clamp(Math.round(metrics.progress));
+    metrics.morale = clamp(Math.round(employees.reduce((sum, employee) => sum + employee.morale, 0) / employees.length));
+    metrics.bugsOpen = defects.filter((defect) => !defect.fixed).length;
+    const missionMessage = choice.chatLine ?? choice.reaction;
+    const channel = mission.character === 'prakash' || mission.character === 'bunty' ? 'prakash' : 'general';
+    const senderName = mission.character === 'prakash' ? 'Mr. Prakash' : mission.character === 'bunty' ? 'Bunty' : employees.find((employee) => employee.id === mission.character)?.name ?? mission.character;
+    const message = makeMessage(channel, mission.character, senderName, missionMessage, state.day, mission.character === 'prakash' || mission.character === 'bunty' ? 'client' : 'funny');
+    const notification = makeNotification(`MISSION COMPLETE · ${mission.title}`, choice.reaction, 'hq', 'success', state.day);
+    set({
+      metrics, employees, tasks, defects,
+      completedMissionIds: [...state.completedMissionIds, missionId],
+      messages: [...state.messages, message],
+      notifications: [notification, ...state.notifications].slice(0, 30),
+      lastAction: `Mission complete: ${mission.title}`,
     });
   },
 
@@ -85,7 +206,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   performAction: (kind, targetId) => {
     const state = get();
-    if (state.phase !== 'desktop' || state.actionsLeft <= 0) return;
+    if ((state.phase !== 'desktop' && state.phase !== 'office') || state.actionsLeft <= 0) return;
     let employees = state.employees.map((employee) => ({ ...employee }));
     let tasks = state.tasks.map((task) => ({ ...task }));
     let metrics = { ...state.metrics };
@@ -183,7 +304,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   assignTask: (taskId, employeeId) => {
     const state = get();
-    if (state.phase !== 'desktop') return;
+    if (state.phase !== 'desktop' && state.phase !== 'office') return;
     const existing = state.tasks.find((task) => task.id === taskId);
     if (!existing || existing.status === 'done' || existing.assignedTo === employeeId) return;
     if (employeeId && !state.employees.some((employee) => employee.id === employeeId)) return;
@@ -198,7 +319,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   approveTask: (taskId) => {
     const state = get();
-    if (state.phase !== 'desktop' || state.actionsLeft <= 0) return;
+    if ((state.phase !== 'desktop' && state.phase !== 'office') || state.actionsLeft <= 0) return;
     const task = state.tasks.find((item) => item.id === taskId);
     if (!task || task.status === 'done' || task.progress < 85 || task.quality < 42) return;
     const tasks = state.tasks.map((item) => item.id === taskId ? { ...item, status: 'done' as const } : item);
@@ -473,7 +594,9 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   endDay: () => {
     const state = get();
-    if (state.phase !== 'desktop' || state.pendingEvent) return;
+    if ((state.phase !== 'desktop' && state.phase !== 'office') || state.pendingEvent) return;
+    const requiredMissions = founderMissions.filter((mission) => mission.day === state.day);
+    if (requiredMissions.some((mission) => !state.completedMissionIds.includes(mission.id))) return;
     if (state.day >= 7) { get().deliverProject(); return; }
     const result = resolveDay(state);
     const nextDay = state.day + 1;
@@ -487,7 +610,6 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       7: 'Looking forward to the demo. Please make sure the buttons work. Last time one button took me to a blank page.',
     };
     if (dayClientLines[nextDay]) newMessages.push(makeMessage('prakash', 'prakash', 'Mr. Prakash', dayClientLines[nextDay], nextDay, 'client'));
-    const event = campaignEvents[nextDay] ? validateGameEvent(campaignEvents[nextDay]) : null;
     const dailyReport = [...state.dailyReports, result.report];
     const notification = makeNotification(`DAY ${state.day} REPORT READY`, result.report.summary, 'hq', result.technicalDebt > 65 ? 'warning' : 'info', state.day);
     let metrics = {
@@ -509,14 +631,14 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
     }
     set({
       day: nextDay,
-      actionsLeft: 3,
+      actionsLeft: 5,
       employees,
       tasks: result.tasks,
       commits: [...state.commits, ...result.commits],
       messages: newMessages,
       metrics,
       dailyReports: dailyReport,
-      pendingEvent: event,
+      pendingEvent: null,
       notifications: [notification, ...state.notifications].slice(0, 30),
       lastAction: `Day ${state.day} closed. Day ${nextDay} has begun.`,
     });
@@ -524,7 +646,9 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   deliverProject: () => {
     const state = get();
-    if (state.phase !== 'desktop') return;
+    if (state.phase !== 'desktop' && state.phase !== 'office') return;
+    const requiredMissions = founderMissions.filter((mission) => mission.day === state.day);
+    if (requiredMissions.some((mission) => !state.completedMissionIds.includes(mission.id))) return;
     const finalResolution = state.day >= 7 && !state.dailyReports.some((report) => report.day === 7) ? resolveDay(state) : null;
     const finalMetrics = finalResolution ? {
       ...state.metrics,
@@ -560,8 +684,8 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'cancelled', title: 'THE CLIENT HAS LEFT THE CHAT', subtitle: 'Contract terminated', body: 'Mr. Prakash has cancelled the project. His final message: “No hard feelings. Bunty found a guy.” There are, in fact, hard feelings.', score: result.total, breakdown: result.breakdown } });
       return;
     }
-    if (coreDone < 5) {
-      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'deadline', title: 'DEADLINE: 0 · PANIC: 100', subtitle: 'The delivery never materialised', body: `Only ${coreDone} of 7 core deliverables reached a usable state. At least five were required for acceptance. The client opened the link, saw a loading spinner and asked whether that was the final logo.`, score: result.total, breakdown: result.breakdown } });
+    if (coreDone < result.requiredCore) {
+      set({ ...sharedUpdate, phase: 'ending', ending: { kind: 'deadline', title: 'DEADLINE: 0 · PANIC: 100', subtitle: 'The delivery never materialised', body: `Only ${coreDone} of ${result.coreTotal} scoped deliverables reached a usable state. ${result.requiredCore} were required for acceptance. The client opened the link, saw a loading spinner and asked whether that was the final logo.`, score: result.total, breakdown: result.breakdown } });
       return;
     }
     if (criticalOpen > 0 || quality < 36) {
@@ -580,7 +704,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
   markNotificationsRead: () => set((state) => ({ notifications: state.notifications.map((item) => ({ ...item, read: true })) })),
 
   discoverTrait: (employeeId) => set((state) => {
-    if (state.phase !== 'desktop' || state.actionsLeft <= 0) return {};
+    if ((state.phase !== 'desktop' && state.phase !== 'office') || state.actionsLeft <= 0) return {};
     const target = state.employees.find((employee) => employee.id === employeeId);
     if (!target || target.discovered) return {};
     return {
@@ -594,7 +718,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
   dismissEvent: () => set({ pendingEvent: null }),
 }), {
   name: 'the-group-project-save',
-  version: 2,
+  version: 3,
   migrate: (persistedState: any) => {
     const fresh = initialState();
     return {
@@ -605,9 +729,11 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
         : fresh.employees,
       relationships: Array.isArray(persistedState?.relationships) ? persistedState.relationships : fresh.relationships,
       tasks: Array.isArray(persistedState?.tasks) ? persistedState.tasks : fresh.tasks,
+      completedMissionIds: Array.isArray(persistedState?.completedMissionIds) ? persistedState.completedMissionIds : fresh.completedMissionIds,
+      roleAssignments: persistedState?.roleAssignments && typeof persistedState.roleAssignments === 'object' ? persistedState.roleAssignments : fresh.roleAssignments,
     };
   },
-  storage: createJSONStorage(() => localStorage),
+  storage: createJSONStorage(getStorage),
   partialize: (state: GameStore) => ({
     phase: state.phase,
     companyName: state.companyName,
@@ -629,9 +755,12 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
     notifications: state.notifications,
     dailyReports: state.dailyReports,
     ending: state.ending,
+    gameOver: state.gameOver,
     lastAction: state.lastAction,
     tutorialSeen: state.tutorialSeen,
     scopeAccepted: state.scopeAccepted,
+    completedMissionIds: state.completedMissionIds,
+    roleAssignments: state.roleAssignments,
   }),
 }));
 

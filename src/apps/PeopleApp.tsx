@@ -1,26 +1,189 @@
 import { useMemo, useState } from 'react';
 import { Brain, BriefcaseBusiness, Heart, MessageCircle, ShieldCheck, Sparkles, Users, Zap } from 'lucide-react';
 import { useGameStore } from '../game/store';
-import { AppHeading, Avatar, Pill, ProgressBar } from './shared';
+import { AppHeading, Pill, ProgressBar } from './shared';
+import { CharacterSprite, type CharacterId } from '../components/CharacterSprite';
 
 export default function PeopleApp() {
   const { employees, relationships, day, actionsLeft, discoverTrait } = useGameStore();
   const [selected, setSelected] = useState('aarav');
   const person = employees.find((employee) => employee.id === selected) ?? employees[0];
-  const connections = useMemo(() => relationships.filter((item) => item.employeeA === selected || item.employeeB === selected), [relationships, selected]);
+  const connections = useMemo(
+    () => relationships.filter((item) => item.employeeA === selected || item.employeeB === selected),
+    [relationships, selected]
+  );
   const employeeFromRelationship = (id: string) => employees.find((employee) => employee.id === id);
-  const relationshipTone = (friction: number) => friction > 65 ? 'danger' : friction > 35 ? 'warning' : 'good';
+  const relationshipTone = (friction: number) => (friction > 65 ? 'danger' : friction > 35 ? 'warning' : 'good');
 
-  return <div className="app-scroll people-app">
-    <AppHeading kicker={`PEOPLE OPERATIONS / DAY ${day}`} title="The humans behind the commits" subtitle="Five employees. One deadline. Several unresolved interpersonal tickets." right={<Pill tone="blue"><Users size={12} /> 5 employees</Pill>} />
-    <div className="people-layout"><aside className="people-roster">{employees.map((employee) => <button key={employee.id} onClick={() => setSelected(employee.id)} className={`people-roster-item ${selected === employee.id ? 'active' : ''}`}><Avatar name={employee.name} emoji={employee.avatar} color={employee.color} /><span><strong>{employee.name}</strong><small>{employee.role}</small></span><span className={`presence-dot ${employee.availability}`} /></button>)}</aside>
-      <section className="employee-profile"><div className="employee-cover" style={{ background: `linear-gradient(120deg, ${person.color}45, #f5f3ec)` }}><div className="employee-big-avatar" style={{ background: person.color }}>{person.avatar}</div><div className="employee-cover-info"><Pill tone={person.availability === 'offline' ? 'danger' : person.availability === 'busy' ? 'warning' : 'good'}>{person.availability}</Pill><h3>{person.name}</h3><p>{person.title}</p></div><div className="employee-id">EMP-{person.id.toUpperCase()}</div></div>
-        <div className="employee-tagline">“{person.tagline}”</div>
-        <div className="employee-stats-grid"><div><span>RELIABILITY</span><strong>{person.reliability}%</strong><ProgressBar value={person.reliability} /></div><div><span>MORALE</span><strong>{person.morale}%</strong><ProgressBar value={person.morale} /></div><div><span>FATIGUE</span><strong>{person.fatigue}%</strong><ProgressBar value={person.fatigue} tone={person.fatigue > 60 ? 'danger' : 'warning'} /></div><div><span>EGO</span><strong>{person.ego}%</strong><ProgressBar value={person.ego} /></div><div><span>FOUNDER TRUST</span><strong>{person.founderTrust}%</strong><ProgressBar value={person.founderTrust} tone="blue" /></div></div>
-        <div className="employee-skill-block"><div className="profile-section-title"><Brain size={15} /> Skill matrix</div>{Object.entries(person.skills).map(([skill, value]) => <div className="skill-line" key={skill}><span>{skill}</span><ProgressBar value={value ?? 0} /><b>{value}</b></div>)}</div>
-        <div className="employee-quirks"><div className="profile-section-title"><Sparkles size={15} /> Known behaviours</div><div className="quirk-chips">{person.quirks.map((quirk) => <span key={quirk}>{quirk}</span>)}</div></div>
-        <div className="hidden-trait-card">{person.discovered ? <><div className="profile-section-title"><ShieldCheck size={15} /> Hidden trait discovered</div><p>{person.hiddenTrait}</p></> : <><div className="profile-section-title"><Brain size={15} /> Unknown trait</div><p>Not all employee capabilities are visible yet. Observe their work, inspect repository evidence or investigate their behaviour.</p><button className="small-action" onClick={() => discoverTrait(person.id)} disabled={actionsLeft <= 0}>INVESTIGATE · 1 ACTION</button></>}</div>
-      </section></div>
-    <section className="relationship-section"><div className="panel-title-row"><div><span className="app-kicker">WORKPLACE DYNAMICS</span><h3>Relationship graph</h3></div><Pill tone="warning">Social technical debt</Pill></div><div className="relationship-grid">{connections.map((relationship) => { const otherId = relationship.employeeA === selected ? relationship.employeeB : relationship.employeeA; const other = employeeFromRelationship(otherId); return <div className="relationship-card" key={`${relationship.employeeA}-${relationship.employeeB}`}><span className="relationship-person" style={{ background: other?.color }}>{other?.avatar}</span><div><strong>{other?.name}</strong><small>{relationship.label}</small><div className="relationship-bars"><span>Trust <b>{relationship.trust}</b></span><ProgressBar value={relationship.trust} /><span>Friction <b>{relationship.friction}</b></span><ProgressBar value={relationship.friction} tone="warning" /></div><p>{relationship.history}</p></div><Pill tone={relationshipTone(relationship.friction)}>{relationship.friction > 65 ? 'TENSE' : relationship.friction > 35 ? 'COMPLICATED' : 'HEALTHY'}</Pill></div>; })}</div></section>
-  </div>;
+  return (
+    <div className="app-scroll people-app">
+      <AppHeading
+        kicker={`TEAM ROOM / HUMAN CAPITAL · DAY ${day}`}
+        title="Team Room"
+        subtitle="Five teammates. Seven days. Several unresolved interpersonal pull requests."
+        right={
+          <Pill tone="blue">
+            <Users size={14} /> 5 EMPLOYEES
+          </Pill>
+        }
+      />
+
+      <div className="people-layout">
+        <aside className="people-roster">
+          {employees.map((employee) => (
+            <button
+              key={employee.id}
+              onClick={() => setSelected(employee.id)}
+              className={`people-roster-item ${selected === employee.id ? 'active' : ''}`}
+            >
+              <CharacterSprite character={employee.id as CharacterId} size="sm" />
+              <span>
+                <strong>{employee.name}</strong>
+                <small>{employee.role}</small>
+              </span>
+              <span className={`presence-dot ${employee.availability}`} />
+            </button>
+          ))}
+        </aside>
+
+        <section className="employee-profile">
+          <div className="employee-cover" style={{ background: `linear-gradient(120deg, ${person.color}35, #f5f3ec)` }}>
+            <div className="employee-big-avatar">
+              <CharacterSprite character={person.id as CharacterId} expression="happy" size="lg" />
+            </div>
+            <div className="employee-cover-info">
+              <Pill tone={person.availability === 'offline' ? 'danger' : person.availability === 'busy' ? 'warning' : 'good'}>
+                {person.availability}
+              </Pill>
+              <h3>{person.name}</h3>
+              <p>{person.title}</p>
+            </div>
+            <div className="employee-id">EMP-{person.id.toUpperCase()}</div>
+          </div>
+
+          <div className="employee-tagline">“{person.tagline}”</div>
+
+          <div className="employee-stats-grid">
+            <div>
+              <span>RELIABILITY</span>
+              <strong>{person.reliability}%</strong>
+              <ProgressBar value={person.reliability} />
+            </div>
+            <div>
+              <span>MORALE</span>
+              <strong>{person.morale}%</strong>
+              <ProgressBar value={person.morale} />
+            </div>
+            <div>
+              <span>FATIGUE</span>
+              <strong>{person.fatigue}%</strong>
+              <ProgressBar value={person.fatigue} tone={person.fatigue > 60 ? 'danger' : 'warning'} />
+            </div>
+            <div>
+              <span>EGO</span>
+              <strong>{person.ego}%</strong>
+              <ProgressBar value={person.ego} />
+            </div>
+            <div>
+              <span>FOUNDER TRUST</span>
+              <strong>{person.founderTrust}%</strong>
+              <ProgressBar value={person.founderTrust} tone="blue" />
+            </div>
+          </div>
+
+          <div className="employee-skill-block">
+            <div className="profile-section-title">
+              <Brain size={16} /> Technical & Creative Skill Breakdown
+            </div>
+            {Object.entries(person.skills).map(([skill, value]) => (
+              <div className="skill-line" key={skill}>
+                <span>{skill.toUpperCase()}</span>
+                <ProgressBar value={value ?? 0} />
+                <b>{value}%</b>
+              </div>
+            ))}
+          </div>
+
+          <div className="employee-quirks">
+            <div className="profile-section-title">
+              <Sparkles size={16} /> Known Habits & Office Behaviours
+            </div>
+            <div className="quirk-chips">
+              {person.quirks.map((quirk) => (
+                <span key={quirk}>{quirk}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden-trait-card">
+            {person.discovered ? (
+              <>
+                <div className="profile-section-title">
+                  <ShieldCheck size={16} /> Hidden Working Trait Revealed
+                </div>
+                <p>{person.hiddenTrait}</p>
+              </>
+            ) : (
+              <>
+                <div className="profile-section-title">
+                  <Brain size={16} /> Undiscovered Working Trait
+                </div>
+                <p>
+                  Observe their work, inspect simulated repository commits, or investigate their habits to reveal hidden traits.
+                </p>
+                <button
+                  className="small-action"
+                  onClick={() => discoverTrait(person.id)}
+                  disabled={actionsLeft <= 0}
+                >
+                  INVESTIGATE STYLE · 1 ACTION
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      </div>
+
+      <section className="relationship-section">
+        <div className="panel-title-row">
+          <div>
+            <span className="app-kicker">WORKPLACE DYNAMICS</span>
+            <h3>Team Relationship Graph</h3>
+          </div>
+          <Pill tone="warning">Interpersonal Technical Debt</Pill>
+        </div>
+        <div className="relationship-grid">
+          {connections.map((relationship) => {
+            const otherId = relationship.employeeA === selected ? relationship.employeeB : relationship.employeeA;
+            const other = employeeFromRelationship(otherId);
+            return (
+              <div className="relationship-card" key={`${relationship.employeeA}-${relationship.employeeB}`}>
+                <div className="relationship-person-frame">
+                  <CharacterSprite character={otherId as CharacterId} size="sm" />
+                </div>
+                <div>
+                  <strong>{other?.name}</strong>
+                  <small>{relationship.label}</small>
+                  <div className="relationship-bars">
+                    <span>
+                      Trust <b>{relationship.trust}%</b>
+                    </span>
+                    <ProgressBar value={relationship.trust} />
+                    <span>
+                      Friction <b>{relationship.friction}%</b>
+                    </span>
+                    <ProgressBar value={relationship.friction} tone="warning" />
+                  </div>
+                  <p>{relationship.history}</p>
+                </div>
+                <Pill tone={relationshipTone(relationship.friction)}>
+                  {relationship.friction > 65 ? 'TENSE' : relationship.friction > 35 ? 'COMPLICATED' : 'HEALTHY'}
+                </Pill>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
 }

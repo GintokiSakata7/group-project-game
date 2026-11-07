@@ -193,9 +193,10 @@ export function resolveDay(state: GameState): DayResolution {
 }
 
 export function calculateDeliveryScore(state: GameState) {
-  const coreIds = ['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo', 'deployment'];
+  const coreIds = [...new Set([...(state.scopeAccepted.length ? state.scopeAccepted : ['homepage', 'catalogue', 'whatsapp', 'contact', 'responsive', 'seo']), 'deployment'])];
   const coreTasks = coreIds.map((id) => state.tasks.find((task) => task.id === id)).filter((task): task is ProjectTask => Boolean(task));
   const coreDone = coreTasks.filter((task) => task.progress >= 75).length;
+  const requiredCore = Math.max(1, Math.ceil(coreTasks.length * 0.7));
   const criticalOpen = state.defects.filter((defect) => !defect.fixed && defect.severity === 'critical').length;
   const quality = state.metrics.quality;
   const deadline = Math.round((coreDone / coreIds.length) * 40);
@@ -207,6 +208,8 @@ export function calculateDeliveryScore(state: GameState) {
   return {
     total,
     coreDone,
+    coreTotal: coreTasks.length,
+    requiredCore,
     criticalOpen,
     breakdown: [
       { label: 'Deliverable coverage', score: deadline, detail: `${coreDone} of ${coreIds.length} core deliverables reached 75%.` },

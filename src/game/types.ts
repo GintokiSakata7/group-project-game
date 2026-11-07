@@ -10,7 +10,17 @@ export type AppId =
   | 'files'
   | 'terminal';
 
-export type Phase = 'title' | 'negotiation' | 'desktop' | 'ending';
+export type Phase =
+  | 'title'
+  | 'prologue'
+  | 'negotiation'
+  | 'client_meeting'
+  | 'contract_signed'
+  | 'kickoff_meeting'
+  | 'office'
+  | 'desktop'
+  | 'game_over'
+  | 'ending';
 export type Availability = 'online' | 'busy' | 'offline' | 'afk';
 export type TaskStatus = 'backlog' | 'assigned' | 'in_progress' | 'review' | 'done' | 'blocked';
 export type TaskCategory = 'frontend' | 'backend' | 'design' | 'content' | 'testing' | 'deployment' | 'architecture';
@@ -171,6 +181,13 @@ export interface NotificationItem {
   read: boolean;
 }
 
+export interface GameOverInfo {
+  title: string;
+  subtitle: string;
+  body: string;
+  reason: 'failed_negotiation' | 'insolvency' | 'client_fired';
+}
+
 export interface GameState {
   phase: Phase;
   companyName: string;
@@ -192,9 +209,12 @@ export interface GameState {
   notifications: NotificationItem[];
   dailyReports: DailyReport[];
   ending: Ending | null;
+  gameOver: GameOverInfo | null;
   lastAction: string;
   tutorialSeen: boolean;
   scopeAccepted: string[];
+  completedMissionIds: string[];
+  roleAssignments: Record<string, string>;
 }
 
 export type ActionKind = 'code' | 'motivate' | 'pair' | 'audit' | 'client' | 'triage' | 'investigate';

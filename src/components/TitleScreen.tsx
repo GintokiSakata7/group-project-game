@@ -1,17 +1,36 @@
 import { motion } from 'motion/react';
-import { ArrowRight, AudioLines, BriefcaseBusiness, CirclePlay, Gamepad2, ShieldCheck, Sparkles, Terminal, Users } from 'lucide-react';
+import { ArrowRight, Gamepad2, Volume2 } from 'lucide-react';
 import { useGameStore } from '../game/store';
 
 export default function TitleScreen() {
-  const beginNegotiation = useGameStore((state) => state.beginNegotiation);
-  const begin = () => beginNegotiation();
-  return <main className="title-screen">
-    <div className="title-noise" /><div className="title-orbit orbit-a" /><div className="title-orbit orbit-b" />
-    <header className="title-header"><div className="brand-lockup"><span className="brand-mark">P</span><span>PANIC LABS <small>INTERACTIVE</small></span></div><span className="title-edition">AN ALMOST PROFESSIONAL SIMULATOR <i>·</i> VOL. 01</span><span className="title-version">BUILD 0.7.0</span></header>
-    <section className="title-hero"><motion.div className="title-copy" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}><div className="title-eyebrow"><span className="live-dot" /> YOUR FIRST CLIENT IS WAITING</div><h1>THE GROUP<br /><em>PROJECT.</em></h1><p className="title-lead">You founded a software company. You hired five people. You signed one client. <strong>Now try to ship something.</strong></p><div className="title-ctas"><button className="title-start-button" onClick={begin}><CirclePlay size={19} /> START CAMPAIGN <ArrowRight size={17} /></button><span className="title-cta-note">7 DAYS · 5 EMPLOYEES · QUESTIONABLE DECISIONS</span></div><div className="title-facts"><span><Users size={14} /> 5 unpredictable employees</span><span><BriefcaseBusiness size={14} /> 1 demanding client</span><span><ShieldCheck size={14} /> 0 guaranteed outcomes</span></div></motion.div>
-      <motion.div className="title-art" initial={{ opacity: 0, scale: 0.94, rotate: 1 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.7, delay: 0.12 }}><div className="title-screen-frame"><div className="title-screen-bar"><span /><span /><span /><b>ALMOSTOS / PANIC LABS</b><small>● LIVE</small></div><div className="title-screen-body"><div className="mini-desktop-sidebar"><i>▦</i><i>▤</i><i>⌘</i><i>◉</i><i>⚙</i></div><div className="mini-desktop-content"><div className="mini-status-row"><span>ROYAL FEAST / SPRINT 01</span><b>DAY 01 / 07</b></div><div className="mini-progress-card"><small>VERIFIED PROJECT PROGRESS</small><strong>03<span>%</span></strong><div><i /></div></div><div className="mini-chat-card"><div><b>TEAM CHAT</b><small>4 messages unread</small></div><p><i>🧠</i><span><b>Varun</b> Architecture is under control.</span></p><p><i>🔬</i><span><b>Meera</b> Which build?</span></p><p><i>⚡</i><span><b>Aarav</b> Bro, already done.</span></p></div><div className="mini-task-row"><span>Homepage</span><b>8%</b></div><div className="mini-task-row"><span>API integration</span><b>0%</b></div></div></div><div className="mini-sticky sticky-one"><span>CLIENT</span><strong>₹500</strong><small>“Like Swiggy”</small></div><div className="mini-sticky sticky-two"><span>TEAM HEALTH</span><strong>¯\_(ツ)_/¯</strong><small>All good. Apparently.</small></div></div><div className="title-art-caption"><Sparkles size={13} /> THE DESKTOP IS THE GAME</div></motion.div>
-    </section>
-    <section className="title-bottom"><div className="title-bottom-left"><span>01</span><p>NEGOTIATE THE IMPOSSIBLE</p><span>02</span><p>MANAGE THE UNMANAGEABLE</p><span>03</span><p>DELIVER THE UNDELIVERABLE</p></div><div className="title-bottom-right">MADE WITH <span>♥</span> AND SEVERAL UNRESOLVED BUGS</div></section>
-    <div className="title-disclaimer">A fictional workplace comedy. All commits, colleagues and client requirements are simulated. No actual developers were harmed.</div>
-  </main>;
+  const beginPrologue = useGameStore((state) => state.beginPrologue);
+
+  return (
+    <main className="new-title-screen">
+      <div className="title-atmosphere" />
+      <header className="new-title-topbar">
+        <div className="new-brand"><span className="new-brand-mark">M</span><span>MAJIN STUDIOS <small>ORIGINAL GAME</small></span></div>
+        <span className="new-title-edition">A SMALL COMPANY. A VERY BIG PROBLEM.</span>
+      </header>
+
+      <section className="new-title-hero">
+        <motion.div className="new-title-copy" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }}>
+          <div className="new-title-kicker"><i /> A WORKPLACE COMEDY ADVENTURE</div>
+          <h1>THE GROUP<br /><em>PROJECT.</em></h1>
+          <p className="new-title-subtitle">You started a company. You hired a team. You got your first client.</p>
+          <p className="new-title-punchline">Unfortunately, they are all like this.</p>
+          <button className="new-title-start" onClick={beginPrologue}><Gamepad2 size={22} /> START NEW CAMPAIGN <ArrowRight size={20} /></button>
+          <div className="new-title-footnote">A 7-DAY STORY ABOUT BUILDING A COMPANY WITHOUT LOSING YOUR MIND.</div>
+        </motion.div>
+        <motion.div className="new-title-art-wrap" initial={{ opacity: 0, scale: 0.94, rotate: 1 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
+          <div className="new-title-art-glow" />
+          <img src="/assets/title-art.webp" alt="Panic Labs startup office illustration" className="new-title-art" />
+          <div className="new-title-sticker sticker-budget"><small>FIRST CLIENT</small><strong>₹500?</strong><span>be serious.</span></div>
+          <div className="new-title-sticker sticker-deadline"><small>DELIVERY</small><strong>7 DAYS</strong><span>no pressure.</span></div>
+        </motion.div>
+      </section>
+
+      <footer className="new-title-footer"><span>MADE BY MAJIN STUDIOS</span><span>THE BUILD IS FICTIONAL. THE TEAM PROBLEMS ARE NOT.</span><span><Volume2 size={14} /> SOUND & CHAOS RECOMMENDED</span></footer>
+    </main>
+  );
 }

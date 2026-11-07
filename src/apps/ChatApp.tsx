@@ -4,7 +4,7 @@ import { useGameStore } from '../game/store';
 import { Avatar, DotStatus, Pill } from './shared';
 
 export default function ChatApp() {
-  const { channels, messages, employees, day, sendMessage } = useGameStore();
+  const { companyName, channels, messages, employees, day, sendMessage } = useGameStore();
   const [active, setActive] = useState('general');
   const [draft, setDraft] = useState('');
   const [search, setSearch] = useState('');
@@ -34,7 +34,7 @@ export default function ChatApp() {
 
   return <div className="chat-app">
     <aside className="chat-sidebar">
-      <div className="chat-workspace"><span className="workspace-mark">P</span><span><strong>PANIC LABS</strong><small>Founder workspace</small></span><span className="workspace-menu">⌄</span></div>
+      <div className="chat-workspace"><span className="workspace-mark">P</span><span><strong>{companyName}</strong><small>Founder workspace</small></span><span className="workspace-menu">⌄</span></div>
       <div className="chat-search"><Search size={14} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a conversation" /></div>
       {filteredGroups.map((group) => <div className="chat-nav-group" key={group.title}><div className="chat-group-title">{group.title}</div>{group.items.map((item) => <button key={item.id} className={`chat-nav-item ${active === item.id ? 'active' : ''}`} onClick={() => setActive(item.id)}>{item.type === 'group' ? <Hash size={14} /> : item.type === 'client' ? <span className="external-icon">↗</span> : <span className="dm-avatar" style={{ background: nameColor(item.id) }}>{emoji(item.id)}</span>}<span>{item.name}</span>{item.id === 'nikhil' && <span className="offline-mark" />}</button>)}</div>)}
       <div className="chat-sidebar-bottom"><span className="profile-mini">F</span><span><strong>Founder</strong><small>Accountability is online</small></span><span className="online-mark" /></div>
