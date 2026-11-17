@@ -164,90 +164,38 @@ export default function OfficeHub() {
         <div className="game-office-right">
           <span className="game-mini-stat">₹{metrics.cash.toLocaleString('en-IN')}</span>
           <span className="game-mini-stat"><Zap size={15} /> {actionsLeft} ACTIONS</span>
-          <button className="game-staging-button" onClick={() => openDesktop('preview')} title="Inspect the live catering website">
-            <Globe size={15} /> LIVE STAGING
-          </button>
-          <button className="game-computer-button" onClick={() => openDesktop()}><Monitor size={17} /> OPEN COMPUTER</button>
+          <button className="game-computer-button" onClick={() => openDesktop()}><Monitor size={16} /> WORKSTATION</button>
         </div>
       </header>
 
       <section className="game-office-main">
         <div className="game-office-scene-art" />
         <div className="game-office-scene-overlay" />
-        <div className="game-office-intro">
-          <span className="game-scene-kicker"><Sparkles size={15} /> MORNING BRIEFING · {companyName} HQ</span>
-          <h1>{opener.title}</h1>
-          <p>{opener.line}</p>
-        </div>
 
         <MissionControl day={day} />
 
-        {/* Office Amenities & Break Lounge Bar */}
-        <section className="game-amenities-bar">
-          <div className="amenity-station chai-coffee-station">
-            <div className="amenity-station-header">
-              <span className="amenity-icon"><Coffee size={15} /></span>
-              <div>
-                <b>TAPRI CHAI & COFFEE BAR</b>
-                <small>Brews: {coffeeBrewsToday}/3 today</small>
-              </div>
-            </div>
-            <div className="amenity-quick-actions">
-              <button onClick={() => quickBrew('chai')} disabled={coffeeBrewsToday >= 3} title="Adrak cutting chai (Free, Morale +5%, Fatigue -8%)">
-                🍵 Chai (Free)
-              </button>
-              <button onClick={() => quickBrew('filter')} disabled={coffeeBrewsToday >= 3 || metrics.cash < 40} title="South Indian Filter Kaapi (₹40, Morale +8%, Fatigue -12%)">
-                ☕ Filter (₹40)
-              </button>
-              <button className="amenity-btn-alert" onClick={() => quickBrew('espresso')} disabled={coffeeBrewsToday >= 3 || metrics.cash < 100} title="Emergency Nitro Espresso (₹100, Morale +10%, Fatigue -22%)">
-                ⚡ Nitro (₹100)
-              </button>
-            </div>
+        {/* Sleek Office Lounge Bar */}
+        <section className="office-lounge-strip">
+          <div className="lounge-strip-label">
+            <Coffee size={15} />
+            <span>BREAK LOUNGE</span>
           </div>
-
-          <div className="amenity-station food-delivery-station">
-            <div className="amenity-station-header">
-              <span className="amenity-icon"><UtensilsCrossed size={15} /></span>
-              <div>
-                <b>PANICEATS FOOD DELIVERY</b>
-                <small>{mealsOrderedToday.length} meals ordered today</small>
-              </div>
-            </div>
-            <div className="amenity-quick-actions">
-              <button onClick={() => openDesktop('pantry')} className="amenity-btn-food">
-                🍱 Order Lunch / Dinner <ArrowRight size={13} />
-              </button>
-            </div>
-          </div>
-
-          <div className="amenity-station reels-station">
-            <div className="amenity-station-header">
-              <span className="amenity-icon reels-flame"><Flame size={15} /></span>
-              <div>
-                <b>OFFICEGRAM REELS</b>
-                <small>Doomscroll & Coworker Roasts</small>
-              </div>
-            </div>
-            <div className="amenity-quick-actions">
-              <button onClick={() => openDesktop('reels')} className="amenity-btn-reels">
-                📱 Watch Reels <Sparkles size={13} />
-              </button>
-            </div>
-          </div>
-
-          <div className="amenity-station gossip-station">
-            <div className="amenity-station-header">
-              <span className="amenity-icon"><MessageSquareText size={15} /></span>
-              <div>
-                <b>WATERCOOLER</b>
-                <small>Overheard office banter</small>
-              </div>
-            </div>
-            <div className="amenity-quick-actions">
-              <button onClick={() => openDesktop('pantry')} className="amenity-btn-watercooler">
-                💬 Eavesdrop <ArrowRight size={13} />
-              </button>
-            </div>
+          <div className="lounge-strip-actions">
+            <button className="lounge-pill-btn" onClick={() => quickBrew('chai')} disabled={coffeeBrewsToday >= 3} title="Adrak cutting chai (Free, Morale +5%, Fatigue -8%)">
+              🍵 Chai ({Math.max(0, 3 - coffeeBrewsToday)} left)
+            </button>
+            <button className="lounge-pill-btn" onClick={() => quickBrew('filter')} disabled={coffeeBrewsToday >= 3 || metrics.cash < 40} title="South Indian Filter Kaapi (₹40, Morale +8%, Fatigue -12%)">
+              ☕ Kaapi (₹40)
+            </button>
+            <button className="lounge-pill-btn" onClick={() => openDesktop('pantry')} title="PanicEats Food Delivery">
+              🍱 PanicEats {mealsOrderedToday.length > 0 ? `(${mealsOrderedToday.length})` : ''}
+            </button>
+            <button className="lounge-pill-btn" onClick={() => openDesktop('reels')} title="Watch OfficeGram Dev Reels">
+              📱 OfficeGram
+            </button>
+            <button className="lounge-pill-btn" onClick={() => openDesktop('pantry')} title="Overhear office watercooler gossip">
+              💬 Watercooler
+            </button>
           </div>
         </section>
 
@@ -265,36 +213,36 @@ export default function OfficeHub() {
             <motion.div className="game-founder-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
               <div className="game-founder-status">YOU · FOUNDER</div>
               <div className="game-founder-art"><CharacterSprite character="founder" expression="smug" size="lg" speaking /></div>
-              <div className="game-founder-info"><h3>YOU</h3><span>Founder · CEO · Emergency Tea Technician</span><p>Five employees. Seven days. One client who thinks software is a one-click purchase.</p></div>
-              <div className="game-founder-task">CURRENT OBJECTIVE: COMPLETE TODAY'S STORY MISSIONS</div>
+              <div className="game-founder-info"><h3>YOU</h3><span>Founder & CEO</span><p>Five employees. Seven days. One client who thinks software is a one-click purchase.</p></div>
+              <div className="game-founder-task">OBJECTIVE: COMPLETE STORY MISSIONS</div>
             </motion.div>
             {employees.map((employee) => {
               const state = characterDialogue[employee.id];
               const activeTask = tasks.find((task) => task.assignedTo === employee.id && task.progress < 100);
               const offline = employee.availability === 'offline';
-              return <motion.button key={employee.id} className={`game-employee-card ${offline ? 'employee-offline' : ''}`} onClick={() => interact(employee.id)} whileHover={{ y: -9, rotate: employee.id === 'nikhil' ? -1 : 1 }} whileTap={{ scale: .97 }}>
+              return <motion.button key={employee.id} className={`game-employee-card ${offline ? 'employee-offline' : ''}`} onClick={() => interact(employee.id)} whileHover={{ y: -6 }} whileTap={{ scale: .98 }}>
                 <div className="game-employee-status">{offline ? 'LAST SEEN: ???' : employee.availability === 'busy' ? 'BUSY' : 'IN OFFICE'}</div>
                 <div className="game-employee-art"><CharacterSprite character={employee.id as CharacterId} expression={offline ? 'exhausted' : state?.expression ?? 'neutral'} size="lg" speaking={!offline} /></div>
-                <div className="game-employee-info"><h3>{employee.name} ({employee.role})</h3><span>{employee.title}</span><p>{employee.tagline}</p></div>
-                <div className="game-employee-task">{activeTask ? `WORKING: ${activeTask.title}` : offline ? 'NO SIGNAL. NO SHAME.' : 'WAITING FOR INSTRUCTIONS'}</div>
-                <div className="game-employee-hover">TALK TO {employee.name.toUpperCase()} <ArrowRight size={14} /></div>
+                <div className="game-employee-info"><h3>{employee.name}</h3><span>{employee.title}</span><p>{employee.tagline}</p></div>
+                <div className="game-employee-task">{activeTask ? `TASK: ${activeTask.title}` : offline ? 'NO SIGNAL' : 'READY'}</div>
+                <div className="game-employee-hover">INTERACT <ArrowRight size={13} /></div>
               </motion.button>;
             })}
           </div>
         </div>
 
         <div className="game-office-bottom">
-          <div className="game-office-left-note"><div className="game-note-icon">☕</div><div><b>{doneTasks}/{tasks.length} tasks complete</b><span>{criticalBugs ? `${criticalBugs} critical bug(s) still open. Meera is aware.` : 'No critical bugs reported. Suspicious.'}</span></div></div>
+          <div className="game-office-left-note"><div className="game-note-icon">☕</div><div><b>{doneTasks}/{tasks.length} tasks complete</b><span>{criticalBugs ? `${criticalBugs} critical bug(s) open.` : 'No critical blockers reported.'}</span></div></div>
           <div className="game-office-progress"><div><span>PROJECT PROGRESS</span><b>{progress}%</b></div><i><span style={{ width: `${progress}%` }} /></i></div>
           <div className="game-office-actions">
             <button className="game-preview-workspace" onClick={() => openDesktop('preview')}>
-              <Globe size={17} /> LIVE STAGING (localhost:3000)
+              <Globe size={16} /> LIVE STAGING
             </button>
             <button className="game-open-workspace" onClick={() => openDesktop()}>
-              <Laptop size={18} /> WORKSTATION
+              <Laptop size={16} /> WORKSTATION
             </button>
             <button className="game-end-day" disabled={Boolean(pendingEvent) || !missionsComplete} onClick={closeDay}>
-              {day === 7 ? 'DELIVER PROJECT' : missionsComplete ? 'END THE DAY' : `MISSIONS ${dayMissions.filter((mission) => completedMissionIds.includes(mission.id)).length}/${dayMissions.length}`} <ArrowRight size={18} />
+              {day === 7 ? 'DELIVER PROJECT' : missionsComplete ? 'END DAY' : `MISSIONS ${dayMissions.filter((mission) => completedMissionIds.includes(mission.id)).length}/${dayMissions.length}`} <ArrowRight size={16} />
             </button>
           </div>
         </div>

@@ -580,73 +580,76 @@ export default function ClientMeeting() {
 
       {/* Main Video Call Stage */}
       <section className="client-meeting-stage-v2">
-        {/* Left Column: 3-Tile Video Grid (Mr. Prakash, Bunty, You) */}
-        <div className="video-tiles-grid">
+        {/* Left Column: Video Stage (Spotlight Prakash + Duo Bunty & Founder) */}
+        <div className="video-tiles-stage">
           {/* Tile 1: Mr. Prakash */}
           <div className="video-tile prakash-tile">
             <div className="tile-header">
-              <span className="tile-live-badge">SPEAKING</span>
+              <span className="tile-live-badge">SPEAKING · CLIENT</span>
               <span className="tile-network-bars">📶 HD</span>
             </div>
             <div className="tile-sprite-wrap">
-              <CharacterSprite character="prakash" expression={clientMood} size="xl" speaking={true} />
+              <CharacterSprite character="prakash" expression={clientMood} size="lg" speaking={true} />
             </div>
             <div className="tile-footer-nameplate">
               <div>
                 <strong>Mr. Prakash</strong>
-                <small>Owner · Royal Feast Catering</small>
+                <small>Owner · Royal Feast</small>
               </div>
               <span className="tile-role-pill">CATERING BOSS</span>
             </div>
           </div>
 
-          {/* Tile 2: Bunty (Nephew & Tech Disruptor) */}
-          <div className="video-tile bunty-tile">
-            <div className="tile-header">
-              <span className="tile-live-badge bunty-badge">NEPHEW CAM</span>
-              <span className="tile-network-bars">👾 RGB</span>
-            </div>
-            <div className="tile-sprite-wrap bunty-sprite-wrap">
-              <CharacterSprite character="bunty" expression="happy" size="md" />
-              {/* Dynamic Bunty Sticky Note Popup */}
-              <motion.div
-                className="bunty-bubble-popup"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                key={stage.step}
-              >
-                <div className="bunty-bubble-header">
-                  <Zap size={11} /> BUNTY (0 APPS SHIPPED):
-                </div>
-                <p>“{stage.buntyStickyNote}”</p>
-              </motion.div>
-            </div>
-            <div className="tile-footer-nameplate">
-              <div>
-                <strong>Bunty (Nephew)</strong>
-                <small>10th Std Computer Topper</small>
+          <div className="video-subtiles-row">
+            {/* Tile 2: Bunty */}
+            <div className="video-tile bunty-tile">
+              <div className="tile-header">
+                <span className="tile-live-badge bunty-badge">NEPHEW</span>
+                <span className="tile-network-bars">👾 RGB</span>
               </div>
-              <span className="tile-role-pill bunty-pill">WEB4 GURU</span>
+              <div className="tile-sprite-wrap bunty-sprite-wrap">
+                <CharacterSprite character="bunty" expression="happy" size="md" />
+              </div>
+              <div className="tile-footer-nameplate">
+                <div>
+                  <strong>Bunty</strong>
+                  <small>Nephew</small>
+                </div>
+                <span className="tile-role-pill bunty-pill">WEB4</span>
+              </div>
+            </div>
+
+            {/* Tile 3: You (The Founder) */}
+            <div className="video-tile founder-tile">
+              <div className="tile-header">
+                <span className="tile-live-badge founder-badge">YOU</span>
+                <span className="tile-network-bars">☕ CEO</span>
+              </div>
+              <div className="tile-sprite-wrap">
+                <CharacterSprite character="founder" expression={isCameraOff ? 'neutral' : 'smug'} size="md" />
+              </div>
+              <div className="tile-footer-nameplate">
+                <div>
+                  <strong>You</strong>
+                  <small>{companyName}</small>
+                </div>
+                <span className="tile-role-pill founder-pill">FOUNDER</span>
+              </div>
             </div>
           </div>
 
-          {/* Tile 3: You (The Founder) */}
-          <div className="video-tile founder-tile">
-            <div className="tile-header">
-              <span className="tile-live-badge founder-badge">YOU</span>
-              <span className="tile-network-bars">☕ CHAI</span>
+          {/* Bunty's Sticky Whisper Note positioned neatly below the video tiles instead of blocking Bunty's face */}
+          <motion.div
+            className="bunty-bubble-card"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            key={stage.step}
+          >
+            <div className="bunty-bubble-header">
+              <Zap size={11} /> BUNTY'S ADVICE (0 APPS SHIPPED):
             </div>
-            <div className="tile-sprite-wrap">
-              <CharacterSprite character="founder" expression={isCameraOff ? 'neutral' : 'smug'} size="lg" />
-            </div>
-            <div className="tile-footer-nameplate">
-              <div>
-                <strong>You (Founder)</strong>
-                <small>{companyName} · CEO</small>
-              </div>
-              <span className="tile-role-pill founder-pill">ON THE HOOK</span>
-            </div>
-          </div>
+            <p>“{stage.buntyStickyNote}”</p>
+          </motion.div>
         </div>
 
         {/* Right Column: Dialogue Subtitle Box & Strategic Choices */}

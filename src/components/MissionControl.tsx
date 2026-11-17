@@ -205,129 +205,62 @@ export default function MissionControl({ day }: { day: number }) {
 
   return (
     <>
-      <section className="founder-mission-board">
-        <div className="mission-board-heading">
-          <div>
-            <span className="mission-kicker">
-              <Target size={15} /> FOUNDER'S STORY MISSIONS
+      <section className="unified-quest-hero">
+        <div className="quest-hero-main">
+          <div className="quest-hero-badge-row">
+            <span className="quest-badge-tag">
+              <Sparkles size={13} /> {currentMission ? `DAY ${day} MISSION · 0${completedCount + 1}` : `DAY ${day} CLEARED`}
             </span>
-            <h2>{currentMission ? 'Your next move.' : 'Day objectives cleared.'}</h2>
-            <p>
-              {currentMission
-                ? 'The team will not move itself. Gather in the room and lead the discussion.'
-                : 'You handled today’s key situations. The team is waiting for your next instruction.'}
-            </p>
+            {currentMission?.location && (
+              <span className="quest-badge-loc">
+                <MapPin size={12} /> {currentMission.location}
+              </span>
+            )}
+            <span className="quest-badge-count">
+              {completedCount}/{dayMissions.length} CLEARED
+            </span>
           </div>
-          <div className="mission-progress-badge">
-            <b>{completedCount}/{dayMissions.length}</b>
-            <span>MISSIONS CLEARED</span>
-          </div>
+
+          <h2 className="quest-hero-title">
+            {currentMission ? currentMission.title : 'All Story Missions Cleared For Today!'}
+          </h2>
+          <p className="quest-hero-desc">
+            {currentMission ? currentMission.objective : 'You handled today’s key situations. Check the workstation, grab a chai, or close the day when ready.'}
+          </p>
         </div>
 
-        <div className="mission-track">
-          <i style={{ width: `${dayMissions.length ? (completedCount / dayMissions.length) * 100 : 100}%` }} />
-        </div>
-
-        {currentMission ? (
-          <div className="current-mission-card">
-            <div className="mission-card-number">0{completedCount + 1}</div>
-            <div className="mission-card-content">
-              <div className="mission-card-tags">
-                <span className="mission-location">
-                  <MapPin size={13} /> {currentMission.location}
-                </span>
-                {currentMission.missionType && (
-                  <span className="mission-type-pill">
-                    {currentMission.missionType === 'sprint_triage' ? <CalendarClock size={12} /> :
-                     currentMission.missionType === 'code_audit' ? <GitBranch size={12} /> :
-                     currentMission.missionType === 'staging_test' ? <Globe size={12} /> :
-                     currentMission.missionType === 'qa_triage' ? <ShieldCheck size={12} /> :
-                     <MessageSquare size={12} />}
-                    {currentMission.missionType.replace('_', ' ').toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <h3>{currentMission.title}</h3>
-              <p>{currentMission.objective}</p>
-
-              {currentMission.simulationObjectives && currentMission.simulationObjectives.length > 0 && (
-                <div className="mission-objectives-preview">
-                  {currentMission.simulationObjectives.map((obj, i) => (
-                    <div key={obj.id} className="mission-obj-bullet">
-                      <span className="mission-obj-num">0{i + 1}</span>
-                      <span>{obj.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mission-reward-note">
-                INTERACTIVE SIMULATION · REAL SYSTEM CHANGES · CONSEQUENCES CARRY FORWARD
-              </div>
-            </div>
-            <div className="mission-card-buttons">
-              {currentMission.appTarget && currentMission.missionType !== 'standup' ? (
-                <>
-                  <button
-                    className="mission-launch-button"
-                    onClick={() => {
-                      sound.playClick();
-                      openDesktop(currentMission.appTarget);
-                    }}
-                  >
-                    <Rocket size={15} /> {currentMission.appActionLabel || 'LAUNCH SIMULATION'} <ArrowRight size={15} />
-                  </button>
-                  <button
-                    className="mission-standup-secondary-button"
-                    onClick={() => startMission(currentMission)}
-                  >
-                    <MessageSquare size={13} /> Stand-up Discussion
-                  </button>
-                </>
-              ) : (
-                <button className="mission-start-button" onClick={() => startMission(currentMission)}>
-                  START STAND-UP <ArrowRight size={17} />
+        <div className="quest-hero-actions">
+          {currentMission ? (
+            currentMission.appTarget && currentMission.missionType !== 'standup' ? (
+              <div className="quest-btns-split">
+                <button
+                  className="quest-start-btn"
+                  onClick={() => {
+                    sound.playClick();
+                    openDesktop(currentMission.appTarget);
+                  }}
+                >
+                  <Rocket size={15} /> {currentMission.appActionLabel || 'LAUNCH MISSION'} <ArrowRight size={15} />
                 </button>
-              )}
+                <button
+                  className="quest-sub-btn"
+                  onClick={() => startMission(currentMission)}
+                >
+                  <MessageSquare size={13} /> Stand-up Discussion
+                </button>
+              </div>
+            ) : (
+              <button className="quest-start-btn" onClick={() => startMission(currentMission)}>
+                START MISSION <ArrowRight size={16} />
+              </button>
+            )
+          ) : (
+            <div className="quest-done-tag">
+              <CheckCircle2 size={18} />
+              <span>READY TO END DAY</span>
             </div>
-          </div>
-        ) : (
-          <div className="mission-cleared-card">
-            <Trophy size={24} />
-            <div>
-              <b>MAIN STORY MISSIONS COMPLETE</b>
-              <span>Review the team or workstation if you want. When ready, close the day.</span>
-            </div>
-            <span className="mission-cleared-check">
-              <Check size={18} />
-            </span>
-          </div>
-        )}
-
-        {dayMissions.map((mission, index) => (
-          <div
-            className={`mission-mini-row ${
-              completedMissionIds.includes(mission.id)
-                ? 'is-cleared'
-                : mission.id === currentMission?.id
-                ? 'is-current'
-                : 'is-locked'
-            }`}
-            key={mission.id}
-          >
-            <span>
-              {completedMissionIds.includes(mission.id) ? <Check size={14} /> : `0${index + 1}`}
-            </span>
-            <b>{mission.title}</b>
-            <small>
-              {completedMissionIds.includes(mission.id)
-                ? 'CLEARED'
-                : mission.id === currentMission?.id
-                ? 'AVAILABLE NOW'
-                : 'UP NEXT'}
-            </small>
-          </div>
-        ))}
+          )}
+        </div>
       </section>
 
       {/* Interactive Visual Novel Meeting Modal */}

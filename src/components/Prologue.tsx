@@ -13,6 +13,7 @@ interface HireScene {
   talent: string;
   warning: string;
   badge: string;
+  stats: Array<{ label: string; val: number }>;
 }
 
 const hires: HireScene[] = [
@@ -20,36 +21,42 @@ const hires: HireScene[] = [
     character: 'kunal', name: 'Kunal', title: 'Client Relations ("Chief Motivation Officer")', expression: 'happy',
     quote: '“TEAM! We are not building a product. We are building a LEGACY. I made a playlist called Deploy or Die.”',
     talent: 'Keeps the team cheerful and talks to clients confidently.', warning: 'Has never deployed anything. Including himself.', badge: 'HIRE #01 · HYPE DEPARTMENT',
+    stats: [{ label: 'HYPE LEVEL', val: 99 }, { label: 'OPTIMISM', val: 96 }, { label: 'TECH DELIVERY', val: 14 }],
   },
   {
     character: 'aarav', name: 'Aarav', title: 'Full-Stack Vibe Coder', expression: 'smug',
     quote: '“Bro, AI cooked. The whole frontend is done. I have not opened the browser yet, but the vibes are immaculate.”',
     talent: 'Can scaffold features at suspicious speed.', warning: 'May install 19 libraries to create one button.', badge: 'HIRE #02 · VIBE ENGINEERING',
+    stats: [{ label: 'PROMPT SPEED', val: 98 }, { label: 'VIBES', val: 100 }, { label: 'TESTING', val: 8 }],
   },
   {
     character: 'varun', name: 'Varun', title: 'Technical Lead', expression: 'neutral',
     quote: '“Everything is under control. I have designed a scalable architecture for the login page.”',
     talent: 'Can plan systems, coordinate tasks and sound convincing.', warning: 'The architecture may exist only in a 47-slide deck.', badge: 'HIRE #03 · DIAGRAMS & CONFIDENCE',
+    stats: [{ label: 'DIAGRAMS', val: 100 }, { label: 'EXPLAINING', val: 95 }, { label: 'WORKING CODE', val: 26 }],
   },
   {
     character: 'meera', name: 'Meera', title: 'Quality Assurance', expression: 'shocked',
     quote: '“I tested the landing page. The logo is 2 pixels off-centre. I have stopped the release.”',
     talent: 'Finds real defects before the client does.', warning: 'Will test a button in emotional, spiritual and low-network conditions.', badge: 'HIRE #04 · QUALITY CONTROL',
+    stats: [{ label: 'DEFECT RADAR', val: 99 }, { label: 'TOLERANCE', val: 4 }, { label: 'SANITY', val: 32 }],
   },
   {
     character: 'nikhil', name: 'Nikhil', title: 'Backend Developer', expression: 'exhausted',
     quote: '“seen”',
     talent: 'When he appears, he can solve problems nobody else can.', warning: 'His working hours are measured in lunar cycles.', badge: 'HIRE #05 · LAST SEEN: UNKNOWN',
+    stats: [{ label: 'TERMINAL POWER', val: 99 }, { label: 'COMMUTE DISTANCE', val: 100 }, { label: 'WORDS SPOKEN', val: 3 }],
   },
 ];
 
-const founderScene = {
+const founderScene: HireScene = {
   character: 'founder' as CharacterId,
   name: 'You', title: 'Founder · CEO · Emergency Tea Technician', expression: 'smug' as Expression,
   quote: '“I have a laptop, a logo, a questionable business plan and five people who said they know software. What could possibly go wrong?”',
   talent: 'You make the calls. You own the company. You are legally responsible for the group chat.',
   warning: 'Current company balance: enough for tea. Maybe.',
   badge: 'DAY 00 · THE FOUNDER',
+  stats: [{ label: 'STRESS RESISTANCE', val: 92 }, { label: 'FOUNDER RESOLVE', val: 95 }, { label: 'BANK BALANCE', val: 8 }],
 };
 
 export default function Prologue() {
@@ -162,7 +169,21 @@ export default function Prologue() {
                     <div className="hire-fact good"><Check size={17} /><span><b>USEFUL:</b> {scene.talent}</span></div>
                     <div className="hire-fact warning"><Zap size={17} /><span><b>WARNING:</b> {scene.warning}</span></div>
                   </div>
-                  {isHire && <div className="hire-stats"><span>SKILL</span><i /><span>CHAOS</span><i /><span>RELIABILITY</span></div>}
+                  {scene.stats && (
+                    <div className="hire-stats">
+                      {scene.stats.map((s) => (
+                        <div className="hire-stat-col" key={s.label}>
+                          <div className="hire-stat-header">
+                            <span>{s.label}</span>
+                            <b>{s.val}%</b>
+                          </div>
+                          <div className="hire-stat-bar">
+                            <div className="hire-stat-fill" style={{ width: `${s.val}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <button className="story-primary-button" onClick={next}>{isFounder ? 'BUILD THE TEAM' : hireIndex === hires.length - 1 ? 'GATHER THE TEAM' : `HIRE ${scene.name.toUpperCase()}`} <ArrowRight size={19} /></button>
                 </div>
               </div>

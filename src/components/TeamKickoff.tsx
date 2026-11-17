@@ -139,17 +139,11 @@ export default function TeamKickoff() {
       <motion.section className="kickoff-panel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="kickoff-title">
           <span className="kickoff-kicker">
-            <Users size={16} /> EMERGENCY TEAM MEETING
+            <Users size={14} /> EMERGENCY TEAM MEETING · LOCK WORKSTREAMS
           </span>
           <h1>
-            THE CLIENT SAID YES.
-            <br />
-            <em>Now make the team useful.</em>
+            THE CLIENT SAID YES. <em>Now make the team useful.</em>
           </h1>
-          <p>
-            Mr. Prakash has signed. The advance is in. Nephew Bunty is already typing. Before Day 1 begins, assign clear
-            ownership.
-          </p>
         </div>
 
         {/* Live Teammate Commentary / Banter Box */}
@@ -162,18 +156,14 @@ export default function TeamKickoff() {
                 <small>Reacting to role assignment</small>
               </div>
             </div>
+            <div className="kickoff-rule-pill">
+              <b>FOUNDER'S RULE:</b> One owner per workstream. No excuses.
+            </div>
             <span className="kickoff-banter-badge">
               <MessageCircle size={12} /> LIVE REACTION
             </span>
           </div>
           <p className="kickoff-banter-text">{currentBanter}</p>
-        </div>
-
-        <div className="kickoff-rule">
-          <b>FOUNDER'S RULE</b>
-          <span>
-            One owner per workstream. Everyone can help; nobody gets to say “I thought someone else was doing it.”
-          </span>
         </div>
 
         <div className="kickoff-team-grid">
@@ -191,7 +181,7 @@ export default function TeamKickoff() {
                 <div className={`kickoff-member-art kickoff-${person.id}`}>
                   <CharacterSprite
                     character={person.id as CharacterId}
-                    size="lg"
+                    size="md"
                     expression={person.id === 'meera' ? 'shocked' : person.id === 'nikhil' ? 'exhausted' : 'happy'}
                     speaking
                   />

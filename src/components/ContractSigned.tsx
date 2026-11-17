@@ -26,12 +26,9 @@ export default function ContractSigned() {
         <div className="contract-scope-box">
           <div><span>PHASE 1 · AGREED DELIVERABLES</span><b>{contractValue <= 3500 ? 'STARTER WEBSITE' : 'BUSINESS WEBSITE & ENQUIRY FLOW'}</b></div>
           <div className="contract-scope-tags">{included.map((item) => <span key={item}>{item}</span>)}</div>
-          <p>Not included in this release: native mobile apps, AI chatbot, live GPS tracking and payment gateway. Bunty has been informed. He has replied with a thumbs-up and a question mark.</p>
         </div>
         <div className="contract-party-quote"><Sparkles size={18} /><p>“Very good, founder. I have already told my relatives the website will be ready. My nephew Bunty has some suggestions.”</p><b>— Mr. Prakash</b></div>
-        <div className="contract-terms-note"><b>PAYMENT & SUPPORT TERMS</b><span>50% advance secured · Remaining balance on preview/handover · 1 revision round · 7-day defect warranty · Hosting/domain billed separately</span></div>
         <button className="contract-enter-button" onClick={beginKickoffMeeting}>CALL THE KICKOFF MEETING <ArrowRight size={20} /></button>
-        <small className="contract-party-foot">CHAPTER 02 · THE DELIVERY SPRINT BEGINS NOW</small>
       </motion.section>
     </main>
   );

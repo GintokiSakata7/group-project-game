@@ -25,8 +25,6 @@ export default function TitleScreen() {
         <motion.div className="new-title-art-wrap" initial={{ opacity: 0, scale: 0.94, rotate: 1 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
           <div className="new-title-art-glow" />
           <img src="/assets/title-art.webp" alt="Panic Labs startup office illustration" className="new-title-art" />
-          <div className="new-title-sticker sticker-budget"><small>FIRST CLIENT</small><strong>₹500?</strong><span>be serious.</span></div>
-          <div className="new-title-sticker sticker-deadline"><small>DELIVERY</small><strong>7 DAYS</strong><span>no pressure.</span></div>
         </motion.div>
       </section>
 

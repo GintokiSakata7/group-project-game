@@ -303,6 +303,7 @@ export default function ClientDemoCall() {
               <CharacterSprite character="aarav" size="sm" expression="smug" />
               <CharacterSprite character="meera" size="sm" expression="shocked" />
               <CharacterSprite character="varun" size="sm" expression="neutral" />
+              <CharacterSprite character="nikhil" size="sm" expression="exhausted" />
             </div>
             <div className="demo-tile-footer">
               <strong>Engineering Team</strong>

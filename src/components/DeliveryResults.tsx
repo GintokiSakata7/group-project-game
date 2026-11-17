@@ -21,15 +21,13 @@ export default function DeliveryResults() {
 
   const success = ending?.kind === 'success';
   const score = ending?.score ?? 0;
-  const rating = ending?.rating ?? (
-    success
-      ? (score >= 82 ? 'LEGENDARY DELIVERY' : score >= 68 ? 'PROFESSIONAL DELIVERY' : score >= 50 ? 'SCRAPPY LAUNCH' : 'SURVIVAL DELIVERY')
-      : ending?.kind === 'cancelled'
-        ? 'CONTRACT TERMINATED'
-        : ending?.kind === 'deadline'
-          ? 'DEADLINE MISSED'
-          : 'QA REJECTION'
-  );
+  const rating = success
+    ? (ending?.rating || (score >= 82 ? 'LEGENDARY DELIVERY' : score >= 68 ? 'PROFESSIONAL DELIVERY' : score >= 50 ? 'SCRAPPY LAUNCH' : 'SURVIVAL DELIVERY'))
+    : ending?.kind === 'cancelled'
+      ? 'CONTRACT TERMINATED'
+      : ending?.kind === 'deadline'
+        ? 'DEADLINE MISSED'
+        : 'QA REJECTION';
 
   // Identify standout teammates
   const completedTasks = tasks.filter((t) => t.progress >= 75).length;
@@ -62,8 +60,6 @@ Play at: The Group Project`;
 
   return (
     <main className={`delivery-results-screen ${success ? 'is-success' : 'is-failure'}`}>
-      <div className="results-noise" />
-
       {/* Top Header */}
       <header className="results-header">
         <div className="brand-lockup">
@@ -79,144 +75,148 @@ Play at: The Group Project`;
         </div>
       </header>
 
-      {/* Main Scorecard Section */}
+      {/* Main Scorecard Section (Balanced 2-Column Dashboard) */}
       <section className="results-stage">
         <motion.div
-          className="results-main-card"
+          className="results-main-card results-dashboard-grid"
           initial={{ opacity: 0, scale: 0.95, y: 24 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          {/* Hero Banner */}
-          <div className="results-hero">
-            <div className={`results-badge-icon ${success ? 'badge-trophy' : 'badge-skull'}`}>
-              {success ? <Trophy size={48} /> : <Skull size={48} />}
-            </div>
-            <div className="results-titles">
-              <span className="results-kicker">
-                {success ? 'CONTRACT FULFILLED' : ending?.kind === 'cancelled' ? 'CONTRACT TERMINATED' : ending?.kind === 'deadline' ? 'DEADLINE MISSED' : 'ACCEPTANCE FAILED'}
-              </span>
-              <h1>{ending?.title ?? 'PROJECT COMPLETED'}</h1>
-              <div className={`results-rating-pill ${success ? 'pill-success' : 'pill-failure'}`}>
-                <Award size={18} />
-                <span>{rating}</span>
+          {/* Left Column: Verdict, Score & Client Reaction */}
+          <div className="results-col-left">
+            <div className="results-hero">
+              <div className={`results-badge-icon ${success ? 'badge-trophy' : 'badge-skull'}`}>
+                {success ? <Trophy size={42} /> : <Skull size={42} />}
+              </div>
+              <div className="results-titles">
+                <span className="results-kicker">
+                  {success ? 'CONTRACT FULFILLED' : ending?.kind === 'cancelled' ? 'CONTRACT TERMINATED' : ending?.kind === 'deadline' ? 'DEADLINE MISSED' : 'ACCEPTANCE FAILED'}
+                </span>
+                <h1>{ending?.title ?? 'PROJECT COMPLETED'}</h1>
+                <div className={`results-rating-pill ${success ? 'pill-success' : 'pill-failure'}`}>
+                  <Award size={16} />
+                  <span>{rating}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <p className="results-lead-body">{ending?.body}</p>
+            <p className="results-lead-body">{ending?.body}</p>
 
-          {/* Client & Nephew Verdict */}
-          <div className="results-client-verdict-box">
-            <div className="verdict-characters">
-              <CharacterSprite character="prakash" expression={success ? 'happy' : 'shocked'} size="md" />
-              <CharacterSprite character="bunty" expression="smug" size="md" />
-            </div>
-            <div className="verdict-quotes">
-              <strong>MR. PRAKASH’S FINAL VERDICT:</strong>
-              <p>
-                {success
-                  ? '“The website works! Customers are already sending WhatsApp enquiries, and my phone stopped ringing at 2:00 AM. You delivered, founder. You delivered.”'
-                  : ending?.kind === 'deadline'
-                    ? '“I gathered my entire family to see our catering portal, and there were only 2 blank boxes and a spinning circle. Bunty has already engaged a freelancer from Reddit.”'
-                    : ending?.kind === 'cancelled'
-                      ? '“Patience has limits, founder. We had a commitment. Bunty took my phone and showed me someone who promised the full portal in 12 hours.”'
-                      : '“I clicked the menu button and it redirected me to a video of a cat. Bunty says this is not industry standard.”'}
-              </p>
-              <small>
-                <em>Bunty:</em> {success ? '“Still needs blockchain in the footer though.”' : ending?.kind === 'deadline' ? '“I told Uncle: why hire 5 developers when 1 prompt can make a metaverse?”' : '“My friend on Discord warned you!”'}
-              </small>
-            </div>
-          </div>
-
-          {/* Score Meters Grid */}
-          <div className="results-metrics-panel">
             <div className="score-number-box">
-              <span>FINAL SCORE</span>
+              <span>FINAL CAMPAIGN SCORE</span>
               <strong>
                 {score}
                 <small>/100</small>
               </strong>
             </div>
 
-            <div className="score-bars-list">
-              {ending?.breakdown ? (
-                ending.breakdown.map((item) => (
-                  <div key={item.label} className="score-bar-row">
-                    <div className="score-bar-labels">
-                      <strong>{item.label}</strong>
-                      <small>{item.detail}</small>
-                      <b>{item.score} pts</b>
+            {/* Client & Nephew Verdict */}
+            <div className="results-client-verdict-box">
+              <div className="verdict-characters">
+                <CharacterSprite character="prakash" expression={success ? 'happy' : 'shocked'} size="md" />
+                <CharacterSprite character="bunty" expression="smug" size="md" />
+              </div>
+              <div className="verdict-quotes">
+                <strong>MR. PRAKASH'S FINAL VERDICT:</strong>
+                <p>
+                  {success
+                    ? '“The website works! Customers are already sending WhatsApp enquiries, and my phone stopped ringing at 2:00 AM. You delivered, founder.”'
+                    : ending?.kind === 'deadline'
+                      ? '“I gathered my entire family to see our catering portal, and there were only 2 blank boxes and a spinning circle. Bunty has already engaged a freelancer from Reddit.”'
+                      : ending?.kind === 'cancelled'
+                        ? '“Patience has limits, founder. We had a commitment. Bunty took my phone and showed me someone who promised the full portal in 12 hours.”'
+                        : '“I clicked the menu button and it redirected me to a video of a cat. Bunty says this is not industry standard.”'}
+                </p>
+                <small>
+                  <em>Bunty:</em> {success ? '“Still needs blockchain in the footer though.”' : ending?.kind === 'deadline' ? '“I told Uncle: why hire 5 developers when 1 prompt can make a metaverse?”' : '“My friend on Discord warned you!”'}
+                </small>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Breakdown Meters, Awards, Roster & CTAs */}
+          <div className="results-col-right">
+            <div className="results-metrics-panel">
+              <div className="score-bars-list">
+                {ending?.breakdown ? (
+                  ending.breakdown.map((item) => (
+                    <div key={item.label} className="score-bar-row">
+                      <div className="score-bar-labels">
+                        <strong>{item.label}</strong>
+                        <small>{item.detail}</small>
+                        <b>{item.score} pts</b>
+                      </div>
+                      <ProgressBar
+                        value={
+                          (item.score /
+                            (item.label === 'Deliverable coverage'
+                              ? 40
+                              : item.label === 'Product quality'
+                              ? 25
+                              : item.label === 'Client trust'
+                              ? 15
+                              : item.label === 'Release stability'
+                              ? 15
+                              : 5)) *
+                          100
+                        }
+                      />
                     </div>
-                    <ProgressBar
-                      value={
-                        (item.score /
-                          (item.label === 'Deliverable coverage'
-                            ? 40
-                            : item.label === 'Product quality'
-                            ? 25
-                            : item.label === 'Client trust'
-                            ? 15
-                            : item.label === 'Release stability'
-                            ? 15
-                            : 5)) *
-                        100
-                      }
-                    />
+                  ))
+                ) : (
+                  <div className="score-bar-row">
+                    <div className="score-bar-labels">
+                      <strong>Quality & Confidence</strong>
+                      <b>{Math.round(metrics.quality)}%</b>
+                    </div>
+                    <ProgressBar value={metrics.quality} />
                   </div>
-                ))
-              ) : (
-                <div className="score-bar-row">
-                  <div className="score-bar-labels">
-                    <strong>Quality & Confidence</strong>
-                    <b>{Math.round(metrics.quality)}%</b>
+                )}
+              </div>
+            </div>
+
+            {/* Awards Grid */}
+            <div className="results-awards-grid">
+              <div className="award-card award-mvp">
+                <span className="award-tag">🏆 MVP OF THE CAMPAIGN</span>
+                <h4>{mvpName}</h4>
+                <p>{mvpReason}</p>
+              </div>
+
+              <div className="award-card award-liability">
+                <span className="award-tag">🤡 LIABILITY OF THE WEEK</span>
+                <h4>{liabilityName}</h4>
+                <p>{liabilityReason}</p>
+              </div>
+            </div>
+
+            {/* Team Lineup Banner */}
+            <div className="results-team-roster">
+              <span>TEAM SQUAD:</span>
+              <div className="roster-avatars">
+                {employees.map((emp) => (
+                  <div key={emp.id} className="roster-item" title={emp.title}>
+                    <CharacterSprite character={emp.id as any} expression={success ? 'happy' : 'exhausted'} size="sm" />
+                    <small>{emp.name}</small>
                   </div>
-                  <ProgressBar value={metrics.quality} />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Special Humorous Awards */}
-          <div className="results-awards-grid">
-            <div className="award-card award-mvp">
-              <span className="award-tag">🏆 MVP OF THE CAMPAIGN</span>
-              <h4>{mvpName}</h4>
-              <p>{mvpReason}</p>
+                ))}
+              </div>
             </div>
 
-            <div className="award-card award-liability">
-              <span className="award-tag">🤡 LIABILITY OF THE WEEK</span>
-              <h4>{liabilityName}</h4>
-              <p>{liabilityReason}</p>
+            {/* Action CTAs */}
+            <div className="results-footer-actions">
+              <button className="results-copy-btn" onClick={handleCopy}>
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? 'COPIED!' : 'SHARE SCORECARD'}
+              </button>
+
+              <button className="results-restart-btn" onClick={resetGame}>
+                <RotateCcw size={16} />
+                PLAY AGAIN
+                <ArrowRight size={16} />
+              </button>
             </div>
-          </div>
-
-          {/* Team Lineup Banner */}
-          <div className="results-team-roster">
-            <span>THE SQUAD THAT SURVIVED SEVEN DAYS:</span>
-            <div className="roster-avatars">
-              {employees.map((emp) => (
-                <div key={emp.id} className="roster-item" title={emp.title}>
-                  <CharacterSprite character={emp.id as any} expression={success ? 'happy' : 'exhausted'} size="sm" />
-                  <small>{emp.name}</small>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Action CTAs */}
-          <div className="results-footer-actions">
-            <button className="results-copy-btn" onClick={handleCopy}>
-              {copied ? <Check size={18} /> : <Copy size={18} />}
-              {copied ? 'SCORECARD COPIED!' : 'SHARE SCORECARD'}
-            </button>
-
-            <button className="results-restart-btn" onClick={resetGame}>
-              <RotateCcw size={18} />
-              PLAY AGAIN (NEW CAMPAIGN)
-              <ArrowRight size={18} />
-            </button>
           </div>
         </motion.div>
       </section>

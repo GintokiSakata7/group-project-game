@@ -294,22 +294,15 @@ export default function RepoStudio() {
 
   return (
     <div className="app-scroll repo-app">
-      <AppHeading
-        kicker="SOURCE CONTROL / SIMULATED REPOSITORY"
-        title="Code Studio"
-        subtitle="Inspect what the team actually shipped. Commit messages are not acceptance criteria."
-        right={<Pill tone="blue"><GitBranch size={12} /> main</Pill>}
-      />
-
       <ActiveMissionHUD app="repo" />
 
-      {/* Repo Stats Bar */}
+      {/* Clean Repo Bar */}
       <div className="repo-summary">
         <div>
           <span className="repo-logo">⌘</span>
           <span>
             <strong>panic-labs / royal-feast-web</strong>
-            <small>Private repository · TypeScript · Last activity Day {day}</small>
+            <small><GitBranch size={11} /> main · Day {day}</small>
           </span>
         </div>
         <div className="repo-summary-stats">
@@ -446,12 +439,6 @@ export default function RepoStudio() {
                   <small className="tree-author-pill">Varun</small>
                 </button>
               </div>
-            </div>
-
-            {/* Tree Summary Footer */}
-            <div className="file-tree-footer">
-              <Sparkles size={13} />
-              <span>Click a file to inspect simulated code & flag smells</span>
             </div>
           </div>
 

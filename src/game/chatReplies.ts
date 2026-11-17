@@ -24,17 +24,22 @@ let kunalCounter = 0;
 let prakashCounter = 0;
 let generalCounter = 0;
 
-const lastSentBySender: Record<string, string> = {};
+const sentHistory: Record<string, string[]> = {};
 
 function pickNext(senderId: string, options: string[], counter: number): { text: string; nextCounter: number } {
-  let idx = Math.abs(counter) % options.length;
-  let text = options[idx];
-  if (text === lastSentBySender[senderId] && options.length > 1) {
-    idx = (idx + 1) % options.length;
-    text = options[idx];
-  }
-  lastSentBySender[senderId] = text;
-  return { text, nextCounter: idx + 1 };
+  if (!sentHistory[senderId]) sentHistory[senderId] = [];
+  const history = sentHistory[senderId];
+
+  // Prefer options that haven't been sent recently
+  const unused = options.filter((opt) => !history.includes(opt));
+  const pool = unused.length > 0 ? unused : options.filter((opt) => opt !== history[history.length - 1]);
+  const candidates = pool.length > 0 ? pool : options;
+
+  const text = candidates[Math.abs(counter) % candidates.length];
+  history.push(text);
+  if (history.length > 12) history.shift();
+
+  return { text, nextCounter: counter + 1 };
 }
 
 export function isGibberishOrShort(text: string): boolean {
@@ -44,10 +49,13 @@ export function isGibberishOrShort(text: string): boolean {
     return true;
   }
   const lettersOnly = clean.replace(/[^a-zA-Z]/g, '');
-  if (lettersOnly.length >= 3 && !/[aeiouy]/i.test(lettersOnly)) {
+  if (lettersOnly.length >= 2 && !/[aeiouy]/i.test(lettersOnly)) {
     return true;
   }
-  if (/^[^a-zA-Z0-9]+$/.test(clean)) {
+  if (/^[^a-zA-Z0-9\s]+$/.test(clean)) {
+    return true;
+  }
+  if (/^(.)\1{2,}$/.test(clean)) {
     return true;
   }
   return false;
@@ -264,6 +272,24 @@ export function generateChatReplies(
             kind: 'funny',
           },
         ];
+      } else if (/(no|cannot|can't|cant|impossible|not possible|never|stop|nah|refuse|denied|reject)/i.test(lower)) {
+        const buntyRejections = [
+          'Founder bro, why so closed-minded? Every trillion-dollar startup began with someone saying "not possible"!',
+          'My cousin says in Web4, there is no such word as "impossible". It is merely "unminted potential".',
+          'Fine, no blockchain. But what about an animated 3D biryani cursor? That is literally 2 lines of CSS!',
+          'Uncle Prakash told me you are a tech visionary. A visionary never says no to innovation bro!',
+          'Okay okay, no new features today. But tomorrow I will bring a 12-page presentation on AI gulab jamun logistics.',
+        ];
+        const pick = pickNext('bunty', buntyRejections, buntyCounter++);
+        buntyCounter = pick.nextCounter;
+        return [
+          {
+            senderId: 'bunty',
+            senderName: 'Bunty (uninvited)',
+            text: pick.text,
+            kind: 'funny',
+          },
+        ];
       } else if (/(hi|hello|hey|sup|yo)/i.test(lower)) {
         const buntyHellos = [
           'Namaste founder! I was just watching a 3-hour YouTube documentary on decentralized samosa delivery. We need to pivot immediately.',
@@ -280,14 +306,16 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
-        return [
-          {
-            senderId: 'bunty',
-            senderName: 'Bunty (uninvited)',
-            text: 'Is that a secret cryptographic hash? A mnemonic seed phrase? Should I enter that into MetaMask right now?!',
-            kind: 'funny',
-          },
+        const buntyGibberish = [
+          'Is that a secret cryptographic hash? A mnemonic seed phrase? Should I enter that into MetaMask right now?!',
+          'Bro, is that base64 encoded Python? My cousin said hackers talk in secret strings like that!',
+          'Did you just leak the smart contract private key?! Deleting message immediately for opsec!',
+          'Wait, are you typing with an ergonomic split keyboard? That looks like pure productivity typing!',
+          'Is that a prompt injection attack? My AI defences are currently holding!',
         ];
+        const pick = pickNext('bunty', buntyGibberish, buntyCounter++);
+        buntyCounter = pick.nextCounter;
+        return [{ senderId: 'bunty', senderName: 'Bunty (uninvited)', text: pick.text, kind: 'funny' }];
       } else {
         const fallbacks = [
           'I have discussed this with my cousin. He says we can add blockchain in the footer. It is very lightweight.',
@@ -297,6 +325,7 @@ export function generateChatReplies(
           'I tested the website on my iPhone 16 Pro Max. The mutton curry photo took 1.2 seconds to load. We need edge caching.',
           'What if customers can mint their wedding catering receipt as a commemorative soulbound NFT?',
           'Did you see the new viral reel about AI catering robots? I forwarded it to Uncle Prakash with high priority.',
+          'Bro, what if we put a live ticker of how many samosas were consumed in Mumbai today?',
         ];
         const pick = pickNext('bunty', fallbacks, buntyCounter++);
         buntyCounter = pick.nextCounter;
@@ -362,7 +391,15 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
-        const shortReplies = ['seen', '...', 'terminal output: syntax error. just like that message.', 'k'];
+        const shortReplies = [
+          'seen',
+          '...',
+          'keyboard broke?',
+          'terminal output: syntax error. just like that message.',
+          'AFK.',
+          'was that a bash command or a cat on your keyboard?',
+          'k',
+        ];
         const pick = pickNext('nikhil', shortReplies, nikhilCounter++);
         nikhilCounter = pick.nextCounter;
         return [{ senderId: 'nikhil', senderName: 'Nikhil', text: pick.text }];
@@ -372,6 +409,8 @@ export function generateChatReplies(
           'got it. will check after dinner.',
           'seen',
           'zip uploaded. check slack attachments.',
+          'tunnel closing soon. will commit when train exits.',
+          'db connection re-established. don\'t drop table.',
         ];
         const pick = pickNext('nikhil', normalReplies, nikhilCounter++);
         nikhilCounter = pick.nextCounter;
@@ -455,11 +494,20 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
+        const meeraGibberish = [
+          'I cannot parse that input. Is that a test payload for SQL injection? If so, sanitize your inputs.',
+          'Expected string with valid semantics. Received keyboard smash. Defect logged against founder typing speed.',
+          'If you are performing fuzz testing on our chat app, please report results to QA in standard CSV format.',
+          'Please send coherent acceptance criteria instead of random letters.',
+          'My test runner just flagged that message as unhandled exception `TypeError: FounderInputIsGibberish`.',
+        ];
+        const pick = pickNext('meera', meeraGibberish, meeraCounter++);
+        meeraCounter = pick.nextCounter;
         return [
           {
             senderId: 'meera',
             senderName: 'Meera (QA)',
-            text: 'I cannot parse that input. Is that a test payload for SQL injection? If so, sanitize your inputs.',
+            text: pick.text,
             kind: 'funny',
           },
         ];
@@ -469,6 +517,7 @@ export function generateChatReplies(
           'Test report updated. 14 items verified, 3 items suspicious, 1 button currently in an existential crisis.',
           'I am monitoring the pull request queue. Please tell Aarav not to force push directly to main.',
           'Every commit without a test case is an invitation to production disaster.',
+          'I ran the smoke tests. Two passed, one threw a 502, and the contact button vanished into another dimension.',
         ];
         const pick = pickNext('meera', meeraFallbacks, meeraCounter++);
         meeraCounter = pick.nextCounter;
@@ -541,20 +590,23 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
-        return [
-          {
-            senderId: 'aarav',
-            senderName: 'Aarav',
-            text: 'Bro fell asleep on the keyboard. Respect the hustle, get some Red Bull.',
-            kind: 'funny',
-          },
+        const aaravGibberish = [
+          'Bro fell asleep on the keyboard. Respect the hustle, get some Red Bull.',
+          'Did your keyboard just throw an unhandled exception or did your cat take over?',
+          'Is that a new npm library? `npm i ' + clean + '` just to see if it exists bro.',
+          'That message has zero CSS bugs. 10/10 typing vibe.',
         ];
+        const pick = pickNext('aarav', aaravGibberish, aaravCounter++);
+        aaravCounter = pick.nextCounter;
+        return [{ senderId: 'aarav', senderName: 'Aarav', text: pick.text, kind: 'funny' }];
       } else {
         const aaravFallbacks = [
           'Got it bro. Pushing a fix. If the build breaks, it was already like that.',
           'I refactored the entire navbar in 4 minutes. No documentation, purely vibe-driven development.',
           'Currently debugging with console.log("here 1"), console.log("here 2"), console.log("why god why").',
           'Vibe check passed. Deploying to Vercel in 3, 2, 1...',
+          'Bro, I just found out we can animate the samosa with 120 FPS Framer Motion.',
+          'Commit message: "fixed stuff (do not ask what)". Pushed to origin main.',
         ];
         const pick = pickNext('aarav', aaravFallbacks, aaravCounter++);
         aaravCounter = pick.nextCounter;
@@ -602,20 +654,22 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
-        return [
-          {
-            senderId: 'varun',
-            senderName: 'Varun',
-            text: 'That message has anomalous packet structure. I suspect network degradation in the founder\'s subnet.',
-            kind: 'funny',
-          },
+        const varunGibberish = [
+          'That message has anomalous packet structure. I suspect network degradation in the founder\'s subnet.',
+          'Semantic parser returned NULL. I will catalog this syntax under non-deterministic inputs.',
+          'Are those input parameters or is the keyboard controller emitting unmapped ASCII codes?',
+          'From an architectural standpoint, that input lacks structural idempotency.',
         ];
+        const pick = pickNext('varun', varunGibberish, varunCounter++);
+        varunCounter = pick.nextCounter;
+        return [{ senderId: 'varun', senderName: 'Varun', text: pick.text, kind: 'funny' }];
       } else {
         const varunFallbacks = [
           'Acknowledged. I will update the technical documentation and provide a status.',
           'The architectural blueprint has been updated to revision v4.2. Awaiting peer review.',
           'System latency is currently nominal. Please do not introduce unbenchmarked dependencies.',
           'I have containerized our container orchestrator so it can orchestrate other containers.',
+          'I am drafting a memo regarding edge-case mitigation in the contact submission pipeline.',
         ];
         const pick = pickNext('varun', varunFallbacks, varunCounter++);
         varunCounter = pick.nextCounter;
@@ -663,20 +717,24 @@ export function generateChatReplies(
           },
         ];
       } else if (isGibberishOrShort(clean)) {
-        return [
-          {
-            senderId: 'kunal',
-            senderName: 'Kunal',
-            text: 'Love the raw energy in those keystrokes! True passion! I will log that in the minutes of the meeting!',
-            kind: 'funny',
-          },
+        const kunalGibberish = [
+          'Love the raw energy in those keystrokes! True passion! I will log that in the minutes of the meeting!',
+          'Interesting! Is that a new silicon valley acronym or did you spill your chai on the spacebar?',
+          'Noted! I am adding that to our strategic synergy whiteboard under "Organic Ideation"!',
+          'Vibes are off the charts today! That message spoke directly to my soul!',
+          'I will schedule a 5-minute alignment sync so we can align on the deeper meaning of that message!',
         ];
+        const pick = pickNext('kunal', kunalGibberish, kunalCounter++);
+        kunalCounter = pick.nextCounter;
+        return [{ senderId: 'kunal', senderName: 'Kunal', text: pick.text, kind: 'funny' }];
       } else {
         const kunalFallbacks = [
           'Love the initiative! I will capture this in the meeting notes and the meeting notes about the meeting notes.',
           'Sent positive vibes to the engineering channel. Productivity increase expected shortly!',
           'Remember team: a bug is just an unexpected feature on its own spiritual journey.',
           'I scheduled a 15-minute alignment sync so we can align on whether we are aligned.',
+          'Founder, our team alignment metrics are currently 10/10. Let\'s keep this momentum!',
+          'Just brewed a fresh pot of herbal positivity. Client management is 90% psychology!',
         ];
         const pick = pickNext('kunal', kunalFallbacks, kunalCounter++);
         kunalCounter = pick.nextCounter;
@@ -721,24 +779,37 @@ export function generateChatReplies(
         { senderId: 'aarav', senderName: 'Aarav', text: 'Clear cache and cookies bro. Works on my machine.', kind: 'funny' },
       ];
     } else if (isGibberishOrShort(clean)) {
-      const funnyGibberish = [
+      const funnyGibberishPool = [
         [
-          { senderId: 'kunal', senderName: 'Kunal', text: 'That looks like raw keyboard enthusiasm! Keep the momentum high team!', kind: 'funny' as const },
-          { senderId: 'aarav', senderName: 'Aarav', text: 'Cat walked on keyboard? Respect.', kind: 'funny' as const },
+          { senderId: 'kunal', senderName: 'Kunal', text: 'That looks like raw keyboard enthusiasm! Adding it to the sprint energy index!', kind: 'funny' as const },
+          { senderId: 'aarav', senderName: 'Aarav', text: 'Cat walked on keyboard? Respect the vibe.', kind: 'funny' as const },
         ],
         [
-          { senderId: 'varun', senderName: 'Varun', text: 'Unrecognized input syntax detected. Packet loss suspected.', kind: 'normal' as const },
+          { senderId: 'varun', senderName: 'Varun', text: 'Unrecognized input syntax detected. Treating as asynchronous heartbeat signal.', kind: 'normal' as const },
           { senderId: 'nikhil', senderName: 'Nikhil', text: 'seen', kind: 'funny' as const },
         ],
+        [
+          { senderId: 'meera', senderName: 'Meera', text: 'Fuzz testing detected in team chat. Zero vulnerabilities found, but please use valid characters.', kind: 'normal' as const },
+          { senderId: 'kunal', senderName: 'Kunal', text: 'Every keystroke is a step closer to product-market fit!', kind: 'funny' as const },
+        ],
+        [
+          { senderId: 'aarav', senderName: 'Aarav', text: 'Bro is coding in machine binary. Respect.', kind: 'funny' as const },
+          { senderId: 'nikhil', senderName: 'Nikhil', text: '...', kind: 'funny' as const },
+        ],
       ];
-      return funnyGibberish[generalCounter++ % funnyGibberish.length];
+      const idx = generalCounter++ % funnyGibberishPool.length;
+      return funnyGibberishPool[idx];
     } else {
       const generalFallbacks = [
         { senderId: 'kunal', senderName: 'Kunal', text: 'Love the initiative. I will capture this in the meeting notes and the meeting notes about the meeting notes.', kind: 'funny' as const },
         { senderId: 'varun', senderName: 'Varun', text: 'Acknowledged. Adding this context to the system topology map.', kind: 'normal' as const },
         { senderId: 'aarav', senderName: 'Aarav', text: 'Noted bro. I will style this after I finish the button glow effect.', kind: 'funny' as const },
+        { senderId: 'meera', senderName: 'Meera', text: 'Noted. Adding this to the regression test backlog.', kind: 'normal' as const },
+        { senderId: 'nikhil', senderName: 'Nikhil', text: 'seen. will push update tonight.', kind: 'funny' as const },
+        { senderId: 'kunal', senderName: 'Kunal', text: 'Great team momentum! Let\'s stay aligned and crush today\'s milestones!', kind: 'funny' as const },
       ];
-      return [generalFallbacks[generalCounter++ % generalFallbacks.length]];
+      const pick = generalFallbacks[generalCounter++ % generalFallbacks.length];
+      return [pick];
     }
   }
 

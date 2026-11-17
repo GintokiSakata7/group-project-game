@@ -21,22 +21,10 @@ export default function ClientBrowser() {
 
   return (
     <div className="app-scroll browser-app">
-      <div className="browser-chrome">
-        <div className="browser-controls">
-          <i /><i /><i />
-        </div>
-        <div className="browser-address">
-          <ShieldCheck size={14} />
-          <span>https://workspace.panic-labs.local/client/royal-feast</span>
-          <Bookmark size={14} />
-        </div>
-        <ExternalLink size={16} />
-      </div>
-
       <AppHeading
-        kicker="CLIENT DESK / ROYAL FEAST PORTAL"
-        title="Client: Mr. Prakash"
-        subtitle="Owner · Royal Feast Catering · Signed on Day 1"
+        kicker="CLIENT DESK · ROYAL FEAST"
+        title="Mr. Prakash"
+        subtitle="Owner, Royal Feast Catering · Deadline Day 7"
         right={<Pill tone={metrics.clientTrust > 55 ? 'good' : 'warning'}>Trust: {Math.round(metrics.clientTrust)}%</Pill>}
       />
 

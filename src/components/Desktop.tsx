@@ -55,8 +55,10 @@ const appMeta: Record<AppId, { title: string; subtitle: string; icon: ReactNode;
   terminal: { title: 'Build Monitor', subtitle: 'Logs & system status', icon: <Terminal />, color: 'dark', hint: 'It failed for a reason' },
 };
 
-// Adventure & Corporate Apps
-const primaryApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'pantry', 'reels', 'music'];
+// Grouped Apps for Clean Dock & Wallpaper
+const coreWorkApps: AppId[] = ['preview', 'chat', 'repo', 'sprint', 'qa'];
+const corporateApps: AppId[] = ['pantry', 'reels', 'music'];
+const primaryApps: AppId[] = ['preview', 'chat', 'repo', 'sprint', 'qa', 'pantry', 'reels', 'music'];
 const allApps: AppId[] = ['preview', 'chat', 'browser', 'repo', 'people', 'sprint', 'qa', 'pantry', 'reels', 'music', 'hq', 'finance', 'files', 'terminal'];
 
 const defaultWindow = (id: AppId, count: number): WindowState => {
@@ -418,8 +420,8 @@ export default function Desktop() {
       <header className="system-topbar">
         <div className="system-brand">
           <button className="back-to-office-topbar" onClick={goToOffice} title="Return to Office Hub">
-            <Building2 size={16} />
-            <strong>OFFICE HUB</strong>
+            <Building2 size={15} />
+            <strong>Office Hub</strong>
           </button>
           <span className="system-separator">/</span>
           <span className="system-logo">P</span>
@@ -427,23 +429,21 @@ export default function Desktop() {
         </div>
 
         <div className="system-top-center">
-          <span className="desktop-day-tag">DAY {day} <i /> 07</span>
-          <span className="system-project-name">ROYAL FEAST · PHASE 1</span>
+          <span className="desktop-day-tag">Day {day}/7</span>
+          <span className="system-project-name">Royal Feast · Phase 1</span>
           <span className="actions-chip">
-            <Zap size={13} /> {actionsLeft}/5 ACTIONS
+            <Zap size={13} /> {actionsLeft}/5 Actions
           </span>
         </div>
 
         <div className="system-top-right">
           <button
             className={`topbar-music-chip ${isPlayingMusic && !isAudioMuted ? 'is-playing' : ''}`}
-            onClick={() => {
-              openApp('music');
-            }}
+            onClick={() => openApp('music')}
             title="Kunal's Lo-Fi Jukebox (PanicBeats)"
           >
             <Music size={13} className={isPlayingMusic && !isAudioMuted ? 'music-note-spin' : ''} />
-            <span>{sound.getPlayingTrack().track.title.slice(0, 18)}...</span>
+            <span>{sound.getPlayingTrack().track.title.slice(0, 16)}</span>
           </button>
 
           <button
@@ -466,29 +466,26 @@ export default function Desktop() {
             }}
             title="Notifications"
           >
-            <Bell size={16} />
+            <Bell size={15} />
             {unread > 0 && <i>{unread}</i>}
           </button>
+
           <button className="system-clock" onClick={() => setClockMenu((value) => !value)}>
-            <Clock3 size={14} /> {clock} <ChevronDown size={12} />
+            <Clock3 size={13} /> {clock}
           </button>
         </div>
       </header>
 
-      {/* Wallpaper & Desktop Icons */}
+      {/* Clean Minimal Wallpaper */}
       <div className="desktop-wallpaper" onClick={() => { setDesktopMenu(false); setShowNotifications(false); }}>
-        <div className="wallpaper-grid" />
-        <div className="wallpaper-glow glow-one" />
-        <div className="wallpaper-glow glow-two" />
-
         <div className="wallpaper-copy">
-          <span>{companyName.toUpperCase()} FOUNDER OPERATING SYSTEM</span>
+          <span>{companyName.toUpperCase()} FOUNDER OS</span>
           <strong>Ship something.<br /><em>Try not to panic.</em></strong>
-          <small>“We are like a family” — management, moments before a production emergency.</small>
+          <small>Phase 1 Delivery · 7-Day Sprint</small>
         </div>
 
         <div className="desktop-icons">
-          {primaryApps.map((id) => (
+          {coreWorkApps.slice(0, 4).map((id) => (
             <button
               key={id}
               className="desktop-icon"
@@ -501,12 +498,6 @@ export default function Desktop() {
               <span>{appMeta[id].title}</span>
             </button>
           ))}
-        </div>
-
-        <div className="wallpaper-sticker">
-          <span>FIRST CLIENT</span>
-          <strong>07 DAYS</strong>
-          <small>NO PRESSURE.</small>
         </div>
       </div>
 
@@ -535,15 +526,15 @@ export default function Desktop() {
         </button>
 
         {/* Return to Office Hub Button */}
-        <button className="dock-office-link" onClick={goToOffice} title="Return to physical office">
-          <Building2 size={18} />
-          <span>OFFICE ROOM</span>
+        <button className="dock-office-link" onClick={goToOffice} title="Return to Physical Office">
+          <Building2 size={16} />
+          <span>Office</span>
         </button>
 
         <div className="dock-divider" />
 
-        {/* 6 Core Game Apps */}
-        {primaryApps.map((id) => {
+        {/* 5 Core Work Apps */}
+        {coreWorkApps.map((id) => {
           const meta = appMeta[id];
           const isOpen = windows.some((item) => item.id === id);
           return (
@@ -559,11 +550,30 @@ export default function Desktop() {
           );
         })}
 
+        <div className="dock-divider" />
+
+        {/* Corporate Amenities (Pantry, Reels, Music) */}
+        {corporateApps.map((id) => {
+          const meta = appMeta[id];
+          const isOpen = windows.some((item) => item.id === id);
+          return (
+            <button
+              key={id}
+              className={`dock-app amenity-dock-app ${activeId === id && isOpen ? 'active' : ''} ${isOpen ? 'is-open' : ''}`}
+              onClick={() => restore(id)}
+              title={meta.title}
+            >
+              <span className={`dock-icon app-color-${meta.color}`}>{meta.icon}</span>
+              {isOpen && <i />}
+            </button>
+          );
+        })}
+
         <div className="dock-spacer" />
 
         {/* End Day / Deliver */}
         <button className="dock-endday" onClick={handleEndDay} disabled={Boolean(pendingEvent)} title={missionsComplete ? 'Close the day' : 'Return to the office to complete story missions'}>
-          {missionsComplete ? (day === 7 ? 'DELIVER PROJECT' : 'END DAY') : 'RETURN TO MISSIONS'} <span>{missionsComplete ? (day === 7 ? '↗' : '→') : '↩'}</span>
+          {missionsComplete ? (day === 7 ? 'DELIVER PROJECT' : 'END DAY') : 'MISSIONS INCOMPLETE'} <span>{missionsComplete ? (day === 7 ? '↗' : '→') : '↩'}</span>
         </button>
       </footer>
 

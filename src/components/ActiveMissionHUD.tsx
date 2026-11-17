@@ -60,7 +60,7 @@ export default function ActiveMissionHUD({ app }: ActiveMissionHUDProps) {
   const completedMissionIds = useGameStore((state) => state.completedMissionIds);
   const completeFounderMission = useGameStore((state) => state.completeFounderMission);
 
-  const [expanded, setExpanded] = useState<boolean>(true);
+  const [expanded, setExpanded] = useState<boolean>(false);
   const [showStandupModal, setShowStandupModal] = useState<boolean>(false);
   const [standupStep, setStandupStep] = useState<number>(0);
   const [selectedChoice, setSelectedChoice] = useState<MissionChoice | null>(null);
