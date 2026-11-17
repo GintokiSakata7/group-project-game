@@ -5045,7 +5045,8 @@
   height: 120px !important;
 }
 
-.char-avatar-bubble .character-portrait-image {
+.char-avatar-bubble .character-portrait-image,
+.char-avatar-bubble .character-raster-container {
   border-radius: 50%;
   border: none;
   box-shadow: none;

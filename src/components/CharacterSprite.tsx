@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { imageLoadedCache } from '../game/preload';
 
 export type CharacterId = 'kunal' | 'aarav' | 'varun' | 'meera' | 'nikhil' | 'prakash' | 'bunty' | 'founder';
 export type Expression = 'neutral' | 'talking' | 'happy' | 'shocked' | 'exhausted' | 'smug';
@@ -216,6 +218,59 @@ export function CharacterSprite({
     }
   };
 
+  const isRasterCharacter = (['kunal', 'aarav', 'varun', 'meera', 'nikhil', 'prakash'] as CharacterId[]).includes(character);
+  const imageSrc = isRasterCharacter ? `/assets/characters/${character}.webp` : null;
+
+  const [isLoaded, setIsLoaded] = useState(() => (imageSrc ? imageLoadedCache.has(imageSrc) : false));
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (!imageSrc) return;
+    if (imageLoadedCache.has(imageSrc)) {
+      setIsLoaded(true);
+      return;
+    }
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      imageLoadedCache.add(imageSrc);
+      setIsLoaded(true);
+    };
+    img.onerror = () => {
+      setHasError(true);
+    };
+    img.src = imageSrc;
+    if (img.complete && img.naturalWidth > 0) {
+      imageLoadedCache.add(imageSrc);
+      setIsLoaded(true);
+    }
+  }, [imageSrc]);
+
+  const showRasterImage = isRasterCharacter && (isLoaded || (imageSrc ? imageLoadedCache.has(imageSrc) : false)) && !hasError;
+
+  const renderSvgAvatar = () => (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" className="overflow-visible select-none character-vector-avatar">
+      <circle cx="50" cy="50" r="46" fill={p.bg} stroke={p.accent} strokeWidth="3.5" />
+      <ellipse cx="50" cy="92" rx="32" ry="6" fill="#000000" opacity="0.1" />
+      <path d="M 22 94 C 22 75, 32 72, 50 72 C 68 72, 78 75, 78 94 Z" fill={p.shirt} stroke="#1e293b" strokeWidth="3" />
+      <rect x="44" y="62" width="12" height="14" fill={p.skin} />
+      <ellipse cx="50" cy="52" rx="23" ry="24" fill={p.skin} stroke="#1e293b" strokeWidth="3" />
+      <circle cx="26" cy="53" r="4.5" fill={p.skin} stroke="#1e293b" strokeWidth="2" />
+      <circle cx="74" cy="53" r="4.5" fill={p.skin} stroke="#1e293b" strokeWidth="2" />
+      {character === 'meera' ? (
+        <path d="M 25 55 C 23 35, 34 26, 50 26 C 66 26, 77 35, 75 55 C 73 42, 68 34, 50 34 C 32 34, 27 42, 25 55 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
+      ) : character === 'nikhil' ? (
+        <path d="M 26 50 C 25 32, 35 24, 50 24 C 65 24, 75 32, 74 50 C 72 35, 65 29, 50 29 C 35 29, 28 35, 26 50 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
+      ) : (
+        <path d="M 26 48 C 24 30, 36 24, 50 24 C 64 24, 76 30, 74 48 C 70 34, 62 30, 50 30 C 38 30, 30 34, 26 48 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
+      )}
+      {renderEyes()}
+      <path d="M 49 55 L 50 57 L 48 58" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {renderMouth()}
+      {renderAccessories()}
+    </svg>
+  );
+
   return (
     <motion.div
       className={`character-sprite character-${character} ${className}`}
@@ -232,34 +287,41 @@ export function CharacterSprite({
       }}
       onClick={onClick}
     >
-      {(['kunal', 'aarav', 'varun', 'meera', 'nikhil', 'prakash'] as CharacterId[]).includes(character) ? (
-        <img
-          className={`character-portrait-image expression-${expression}`}
-          src={`/assets/characters/${character}.webp`}
-          alt={`${character} character portrait`}
-          draggable={false}
-        />
-      ) : (
-        <svg viewBox="0 0 100 100" width="100%" height="100%" className="overflow-visible select-none">
-          <circle cx="50" cy="50" r="46" fill={p.bg} stroke={p.accent} strokeWidth="3.5" />
-          <ellipse cx="50" cy="92" rx="32" ry="6" fill="#000000" opacity="0.1" />
-          <path d="M 22 94 C 22 75, 32 72, 50 72 C 68 72, 78 75, 78 94 Z" fill={p.shirt} stroke="#1e293b" strokeWidth="3" />
-          <rect x="44" y="62" width="12" height="14" fill={p.skin} />
-          <ellipse cx="50" cy="52" rx="23" ry="24" fill={p.skin} stroke="#1e293b" strokeWidth="3" />
-          <circle cx="26" cy="53" r="4.5" fill={p.skin} stroke="#1e293b" strokeWidth="2" />
-          <circle cx="74" cy="53" r="4.5" fill={p.skin} stroke="#1e293b" strokeWidth="2" />
-          {character === 'meera' ? (
-            <path d="M 25 55 C 23 35, 34 26, 50 26 C 66 26, 77 35, 75 55 C 73 42, 68 34, 50 34 C 32 34, 27 42, 25 55 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
-          ) : character === 'nikhil' ? (
-            <path d="M 26 50 C 25 32, 35 24, 50 24 C 65 24, 75 32, 74 50 C 72 35, 65 29, 50 29 C 35 29, 28 35, 26 50 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
-          ) : (
-            <path d="M 26 48 C 24 30, 36 24, 50 24 C 64 24, 76 30, 74 48 C 70 34, 62 30, 50 30 C 38 30, 30 34, 26 48 Z" fill={p.hair} stroke="#1e293b" strokeWidth="3" />
+      {isRasterCharacter ? (
+        <div className="character-raster-container">
+          <div
+            className="character-fallback-base"
+            style={{
+              opacity: showRasterImage ? 0 : 1,
+              transition: 'opacity 0.25s ease-out',
+            }}
+          >
+            {renderSvgAvatar()}
+          </div>
+          {!hasError && (
+            <img
+              className={`character-portrait-image expression-${expression}`}
+              src={imageSrc!}
+              alt={`${character} character portrait`}
+              draggable={false}
+              loading="eager"
+              decoding="async"
+              style={{
+                opacity: showRasterImage ? 1 : 0,
+                transition: 'opacity 0.25s ease-in',
+              }}
+              onLoad={() => {
+                if (imageSrc) imageLoadedCache.add(imageSrc);
+                setIsLoaded(true);
+              }}
+              onError={() => {
+                setHasError(true);
+              }}
+            />
           )}
-          {renderEyes()}
-          <path d="M 49 55 L 50 57 L 48 58" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" fill="none" />
-          {renderMouth()}
-          {renderAccessories()}
-        </svg>
+        </div>
+      ) : (
+        renderSvgAvatar()
       )}
     </motion.div>
   );

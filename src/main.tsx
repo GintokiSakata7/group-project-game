@@ -2,8 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { preloadAllGameAssets } from './game/preload';
 import './index.css';
 import './gameplay.css';
+
+// Preload character portraits and critical assets immediately on boot
+preloadAllGameAssets();
 
 // Safety hook to allow quick recovery from browser console
 if (typeof window !== 'undefined') {
