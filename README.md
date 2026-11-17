@@ -12,11 +12,10 @@ This is a browser-first, story-led workplace comedy game. The player experiences
 4. **Team recruitment** — meet Kunal, Aarav, Varun, Meera and Nikhil one at a time, with short character-led scenes.
 5. **Incoming client call** — answer Mr. Prakash, then play the negotiation sequence with his nephew Bunty interrupting.
 6. **Contract signed** — a short celebration scene starts the seven-day delivery deadline.
-7. **Post-signature kickoff meeting** — assign one primary owner to each of five workstreams before the delivery clock starts.
-8. **Seven-day founder campaign** — each day has two required story missions. These are concrete founder objectives (run a stand-up, demand a live demo, inspect a commit, negotiate scope, triage QA, verify a handoff, rehearse delivery), not generic dashboard tasks. The player chooses a response and sees the consequences. Both story missions must be completed before the day can close.
-9. **Office hub** — visit the team floor, click employees to talk, spend optional founder actions, inspect the daily mission board and open the workstation. Character dialogue changes across the week.
-10. **Desktop OS** — use Team Chat, Client Desk, Code Studio, Team Room, Task Board and Build Lab to investigate the fictional company. The desktop is an in-world tool; it cannot skip required story missions.
-11. **Delivery and result** — the simulation evaluates deliverables, quality, client trust and team chaos, then creates a shareable campaign scorecard.
+7. **Seven-day founder campaign** — each day has two required story missions. These are concrete founder objectives (run a stand-up, demand a live demo, inspect a commit, negotiate scope, triage QA, verify a handoff, rehearse delivery), not generic dashboard tasks. The player chooses a response and sees the consequences. Both story missions must be completed before the day can close.
+8. **Office hub** — visit the team floor, click employees to talk, spend optional founder actions, inspect the daily mission board and open the workstation. Character dialogue changes across the week.
+9. **Desktop OS** — use Team Chat, Client Desk, Code Studio, Team Room, Task Board and Build Lab to investigate the fictional company. The desktop is an in-world tool; it cannot skip required story missions.
+10. **Delivery and result** — the simulation evaluates deliverables, quality, client trust and team chaos, then creates a shareable campaign scorecard.
 
 The main story remains linear. Decisions affect the simulation, character relationships and ending quality; they do not create separate campaigns. Fatal negotiation decisions lead to Game Over.
 

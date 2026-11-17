@@ -3,7 +3,6 @@ import TitleScreen from './components/TitleScreen';
 import Prologue from './components/Prologue';
 import ClientMeeting from './components/ClientMeeting';
 import ContractSigned from './components/ContractSigned';
-import TeamKickoff from './components/TeamKickoff';
 import OfficeHub from './components/OfficeHub';
 import Desktop from './components/Desktop';
 import ClientDemoCall from './components/ClientDemoCall';
@@ -73,7 +72,10 @@ export default function App() {
   if (phase === 'prologue') return <Prologue />;
   if (phase === 'client_meeting' || phase === 'negotiation') return <ClientMeeting />;
   if (phase === 'contract_signed') return <ContractSigned />;
-  if (phase === 'kickoff_meeting') return <TeamKickoff />;
+  if (phase === 'kickoff_meeting') {
+    useGameStore.getState().completeKickoff();
+    return <OfficeHub />;
+  }
   if (phase === 'office') return <OfficeHub />;
   if (phase === 'desktop') return <Desktop />;
   if (phase === 'live_demo') return <ClientDemoCall />;

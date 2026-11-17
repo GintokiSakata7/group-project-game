@@ -28,7 +28,7 @@ export default function ContractSigned() {
           <div className="contract-scope-tags">{included.map((item) => <span key={item}>{item}</span>)}</div>
         </div>
         <div className="contract-party-quote"><Sparkles size={18} /><p>“Very good, founder. I have already told my relatives the website will be ready. My nephew Bunty has some suggestions.”</p><b>— Mr. Prakash</b></div>
-        <button className="contract-enter-button" onClick={beginKickoffMeeting}>CALL THE KICKOFF MEETING <ArrowRight size={20} /></button>
+        <button className="contract-enter-button" onClick={beginKickoffMeeting}>START DAY 1 · ENTER THE OFFICE <ArrowRight size={20} /></button>
       </motion.section>
     </main>
   );

@@ -34,7 +34,7 @@ interface GameStore extends GameState {
   discoverTrait: (employeeId: string) => void;
   dismissEvent: () => void;
   beginKickoffMeeting: () => void;
-  completeKickoff: (assignments: Record<string, string>) => void;
+  completeKickoff: (assignments?: Record<string, string>) => void;
   completeFounderMission: (missionId: string, choiceId: string) => void;
   brewCoffee: (kind: 'chai' | 'filter' | 'espresso') => { success: boolean; message: string; quote: string };
   orderOfficeFood: (mealId: 'samosa' | 'biryani' | 'salad' | 'pizza') => { success: boolean; message: string };
@@ -169,7 +169,9 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
   beginNegotiation: () => set({ phase: 'client_meeting' }),
   triggerGameOver: (info) => set({ phase: 'game_over', gameOver: info }),
   goToOffice: () => set({ phase: 'office' }),
-  beginKickoffMeeting: () => set({ phase: 'kickoff_meeting' }),
+  beginKickoffMeeting: () => {
+    get().completeKickoff();
+  },
   openDesktop: (initialApp) => set({ phase: 'desktop', activeAppOnDesktop: initialApp ?? null }),
 
   startCampaign: (setup) => {
@@ -201,7 +203,13 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
 
   completeKickoff: (assignments) => {
     const state = get();
-    if (state.phase !== 'kickoff_meeting') return;
+    const effectiveAssignments = assignments ?? {
+      kunal: 'communication',
+      aarav: 'frontend',
+      varun: 'technical',
+      meera: 'quality',
+      nikhil: 'backend',
+    };
     const taskOwners: Record<string, string[]> = {
       communication: ['contact', 'seo', 'presentation'],
       frontend: ['homepage', 'catalogue', 'responsive'],
@@ -213,7 +221,7 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
     const tasks = state.tasks.map((task) => {
       const inScope = state.scopeAccepted.includes(task.id) || alwaysNeeded.has(task.id);
       if (!inScope) return { ...task, assignedTo: null, status: 'backlog' as const, deliverable: false };
-      const owner = Object.entries(assignments).find(([, workstream]) => taskOwners[workstream]?.includes(task.id))?.[0];
+      const owner = Object.entries(effectiveAssignments).find(([, workstream]) => taskOwners[workstream]?.includes(task.id))?.[0];
       const isContractDeliverable = state.scopeAccepted.includes(task.id) || task.id === 'deployment';
       return owner ? { ...task, assignedTo: owner, deliverable: isContractDeliverable, status: task.progress > 0 ? 'in_progress' as const : 'assigned' as const } : { ...task, deliverable: isContractDeliverable };
     });
@@ -224,8 +232,12 @@ export const useGameStore = create<GameStore>()(persist((set, get) => ({
       meera: 'QA ownership confirmed. Please stop merging directly to main. I am begging.',
       nikhil: 'backend assigned. will send progress when network permits.',
     };
-    const messages = [...state.messages, makeMessage('general', 'system', 'ALMOSTOS', 'Kickoff meeting closed. Workstream ownership has been recorded. The deadline is now real.', 1, 'system'), ...Object.entries(assignments).map(([id]) => makeMessage('general', id, state.employees.find((e) => e.id === id)?.name ?? id, employeeLines[id] ?? 'Assignment received.', 1, 'funny'))];
-    set({ phase: 'office', roleAssignments: assignments, tasks, messages, lastAction: 'Kickoff meeting completed. Day 1 is ready.' });
+    const messages = [
+      ...state.messages,
+      makeMessage('general', 'system', 'ALMOSTOS', 'Kickoff meeting closed. Workstream ownership has been recorded. The deadline is now real.', 1, 'system'),
+      ...Object.entries(effectiveAssignments).map(([id]) => makeMessage('general', id, state.employees.find((e) => e.id === id)?.name ?? id, employeeLines[id] ?? 'Assignment received.', 1, 'funny')),
+    ];
+    set({ phase: 'office', roleAssignments: effectiveAssignments, tasks, messages, lastAction: 'Kickoff meeting completed. Day 1 is ready.' });
   },
 
   completeFounderMission: (missionId, choiceId) => {
